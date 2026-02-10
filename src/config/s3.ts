@@ -41,7 +41,7 @@
 
 //    const fileUrl = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
 
-//   console.log(`✅ S3 Upload Success: ${fileUrl}`);
+//   console.log(`S3 Upload Success: ${fileUrl}`);
 //   return fileUrl
 // };
 
@@ -52,23 +52,22 @@
 //   };
   
 //   await s3Client.send(new DeleteObjectCommand(params));
-//   console.log(`🗑️ Deleted: ${key}`);
+//   console.log(`Deleted: ${key}`);
 // };
 
-// // 👈 Usage for KYC (private!)
-// const kycUrl = await uploadToS3(aadhaarFile, 'kyc/landlord', landlordId);
+
 // backend/src/config/s3.ts
 import { ENV } from '../config/env';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 
-// ✅ Initialize lazily to prevent "Missing AWS Credentials" at startup
+
 let _s3Client: S3Client | null = null;
 
 const getS3Client = () => {
   if (!_s3Client) {
     if (!ENV.AWS_ACCESS_KEY_ID || !ENV.AWS_REGION) {
-      console.error("🚨 AWS Config missing!");
+      console.error("AWS Config missing!");
       throw new Error("Missing AWS Credentials");
     }
     _s3Client = new S3Client({
@@ -99,11 +98,11 @@ export const uploadToS3 = async (
 
   await client.send(new PutObjectCommand(params));
 
-  // ✅ Manual URL construction for v3
-  // Use a template that matches your specific S3 region format
+  
+  
   const fileUrl = `https://${ENV.AWS_S3_BUCKET}.s3.${ENV.AWS_REGION}.amazonaws.com/${fileName}`;
 
-  console.log(`✅ S3 Upload Success: ${fileUrl}`);
+  console.log(`S3 Upload Success: ${fileUrl}`);
   return fileUrl;
 };
 

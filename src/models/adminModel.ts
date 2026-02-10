@@ -1,15 +1,15 @@
 
 
-// models/adminModel.ts
+
 import { Schema, model, Document } from "mongoose";
 
-export interface IAdmin extends Document {  // ✅ FIXED: Add extends Document
+export interface IAdmin extends Document {  
   email: string;
   passwordHash: string;
   role: "ADMIN";
   isActive: boolean;
   createdAt: Date;
-  updatedAt: Date;  // ✅ Added for timestamps
+  updatedAt: Date;  
 }
 
 const AdminSchema = new Schema<IAdmin>({
@@ -17,13 +17,13 @@ const AdminSchema = new Schema<IAdmin>({
     type: String, 
     required: true, 
     unique: true,
-    lowercase: true  // ✅ Added
+    lowercase: true  
   },
   passwordHash: { type: String, required: true },
   role: { type: String, default: "ADMIN" },
   isActive: { type: Boolean, default: true }
 }, { 
-  timestamps: true  // ✅ Enables createdAt/updatedAt
+  timestamps: true  
 });
 
 export const AdminModel = model<IAdmin>("Admin", AdminSchema);

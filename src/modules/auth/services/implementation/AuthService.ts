@@ -1,4 +1,4 @@
-import { IAuthService, KycFiles, KycFormData, KycResponse, KycResult, TenantLoginResult, UserProfile, UserSignupResult, verifyLandlordOtpResult} from "../interface/IAuthService";
+import { BaseUserProfile, IAuthService, KycFiles, KycFormData, KycResponse, KycResult, LandlordProfile, TenantLoginResult, UserProfile, UserSignupResult, verifyLandlordOtpResult} from "../interface/IAuthService";
 import { injectable , inject } from "tsyringe";
 import { DI_TYPES } from "../../../../common/di/types";
 import { ITenantRepository } from "../../../../shared/repositories/interface/ITenantRepository";
@@ -21,7 +21,7 @@ import { ILandlordRepository } from "../../../../shared/repositories/interface/I
 import logger from "../../../../utils/logger";
 import { IAdminRepository } from "../../repositories/interface/IAdminRepository";
 import { uploadToS3 } from "../../../../config/s3";
-// import { uploadToS3 } from "../../../../config/s3";
+
 
 function validateAadhaar(number: string): void {
   if (!/^\d{12}$/.test(number)) {
@@ -41,22 +41,22 @@ function validatePan(number: string): void {
 export class AuthService implements IAuthService{
   constructor(
     @inject(DI_TYPES.TenantRepository)
-    private readonly userRepo : ITenantRepository,
+    private readonly _userRepo : ITenantRepository,
     @inject(DI_TYPES.RedisService)
-    private readonly redisService: IRedisService,
+    private readonly _redisService: IRedisService,
     @inject(DI_TYPES.EmailService)
-    private readonly emailService:IEmailService,
+    private readonly _emailService:IEmailService,
     @inject(DI_TYPES.LandlordRepository)
-    private readonly landlordRepo : ILandlordRepository,
+    private readonly _landlordRepo : ILandlordRepository,
     @inject (DI_TYPES.AdminRepository)
-   private readonly adminRepo:IAdminRepository
+   private readonly _adminRepo:IAdminRepository
      ){}
 
      async tenantSignup(dto: UserSignupDto): Promise<UserSignupResult> {
       logger.info('Tenant signup processing', { email: dto.email });
     
         
-          const existing = await this.userRepo.findByEmail(dto.email)
+          const existing = await this._userRepo.findByEmail(dto.email)
           if(existing?.isEmailVerified){
             logger.warn('Email already exists', { email: dto.email });
             throw new AppError(MESSAGES.AUTH.EMAIL_EXISTS,HttpStatus.CONFLICT)
@@ -64,7 +64,7 @@ export class AuthService implements IAuthService{
 
           const  passwordHash = await  bcrypt.hash(dto.password,10)
 
-          const tenant = await this.userRepo.create({
+          const tenant = await this._userRepo.create({
             firstName : dto.firstName,
             lastName : dto.lastName,
             email : dto.email,
@@ -76,12 +76,12 @@ export class AuthService implements IAuthService{
 
           const otp = Math.floor(100000+Math.random()*900000).toString()
           logger.debug('OTP generated', { email: dto.email, otp });
-          await this.redisService.setOtp(tenant.email,otp)
+          await this._redisService.setOtp(tenant.email,otp)
           console.log(`OTP ${otp} sent to ${tenant.email}`);
 
-          await this.redisService.setResendLock(tenant.email)
+          await this._redisService.setResendLock(tenant.email)
 
-          await this.emailService.sendOtpEmail(tenant.email, otp);
+          await this._emailService.sendOtpEmail(tenant.email, otp);
     logger.info('Tenant signup complete', { email: tenant.email });
      
          return {
@@ -96,90 +96,6 @@ export class AuthService implements IAuthService{
      
 
 
-    
-// async googleAuth({ token, role }: { token: string; role: string }): Promise<TenantLoginResult> {
-//  logger.info('Google OAuth processing', { role });
-//   const client = new OAuth2Client(ENV.GOOGLE_CLIENT_ID);
-//   const ticket = await client.verifyIdToken({
-//     idToken: token,
-//     audience: ENV.GOOGLE_CLIENT_ID,
-//   })
-
-//   const payload = ticket.getPayload();
-//   logger.warn('Google OAuth failed - invalid token', { role });
-//   if (!payload ) {
-//     throw new AppError('Invalid Google token', HttpStatus.UNAUTHORIZED);
-//   }
-
-//   const { email, given_name: firstName='', family_name: lastName='', picture: avatar, sub: googleId } = payload;
-
-
-//   if (!email) {
-//     logger.warn('Google OAuth failed - no email', { role, googleId: googleId?.substring(0, 8) });
-//   throw new AppError('Google account must have an email associated', HttpStatus.BAD_REQUEST);
-// }
-  
-//   logger.debug('Google user data', { email, role, googleId: googleId?.substring(0, 8) });
-  
-//   const repo = role === 'TENANT' ? this.userRepo : this.landlordRepo;
-//   let user = await repo.findByEmail(email);
-
-  
-//   if (!user) {
-//      logger.info('Google OAuth - creating new user', { email, role });
-//     const newUserData : Partial<ITenant> | Partial<ILandlord> = {
-//       firstName:firstName || 'User',
-//       lastName:lastName || '',
-//       email,
-//       role:role as UserRole,
-//       avatar: avatar || '',
-//       googleId,
-//       isEmailVerified: true,
-//       isActive: true,
-//       phone: '',
-     
-//     };
-    
-//     logger.info('Google user created', { email, role });
-//     user = await repo.create(newUserData);
-//   }
-
-
-//   const existingUser = await this.userRepo.findByEmail(email);
-//   const existingLandlord = await this.landlordRepo.findByEmail(email);
-//   if (existingUser && existingUser.role !== role) {
-//      logger.warn('Google OAuth blocked - role conflict', { email, requestedRole: role, existingRole: existingUser.role });
-//     throw new AppError('Email already registered with different role', HttpStatus.CONFLICT);
-//   }
-//   if (existingLandlord && existingLandlord.role !== role) {
-//      logger.warn('Google OAuth blocked - role conflict', { email, requestedRole: role, existingRole: existingLandlord.role });
-//     throw new AppError('Email already registered with different role', HttpStatus.CONFLICT);
-//   }
-
-  
-//   const payloadJwt = { userId: user._id, email: user.email, role: user.role };
-//   const accessToken = jwt.sign(payloadJwt, ENV.JWT_ACCESS_SECRET, { expiresIn: '15m' });
-//   const refreshToken = jwt.sign(payloadJwt, ENV.JWT_REFRESH_SECRET, { expiresIn: '7d' });
-
-
-//  logger.info('Google OAuth complete - tokens generated', { 
-//     userId: user._id,
-//     email: user.email,
-//     role: user.role 
-//   });
-
-//   return {
-//     user: { 
-//       id: user._id.toString(), 
-//       email: user.email, 
-//       role: user.role,
-//       fullName: `${user.firstName} ${user.lastName}`,
-//       avatar: user.avatar || '',
-//       phone : user.phone
-//     },
-//     tokens: { accessToken, refreshToken }
-//   };
-// }
 
 
 
@@ -210,7 +126,7 @@ export class AuthService implements IAuthService{
 
   if (role === 'TENANT') {
     
-   const existingTenant = await this.userRepo.findByEmail(email);
+   const existingTenant = await this._userRepo.findByEmail(email);
     
     if (!existingTenant) {
      
@@ -219,19 +135,19 @@ export class AuthService implements IAuthService{
         lastName: lastName || '',
         email,
         role: 'TENANT' as UserRole,
-        avatar: avatar || '',
+        // avatar: avatar || '',
         googleId,
         isEmailVerified: true,
         isActive: true,
         phone: '',
       };
-      user = await this.userRepo.create(newTenantData);
+      user = await this._userRepo.create(newTenantData);
       logger.info('New tenant created via Google OAuth', { email });
     }else{
       user = existingTenant; 
     }
   } else {
-   const existingLandlord = await this.landlordRepo.findByEmail(email);
+   const existingLandlord = await this._landlordRepo.findByEmail(email);
     
     if (!existingLandlord) {
       const newLandlordData: Partial<ILandlord> = {
@@ -239,14 +155,14 @@ export class AuthService implements IAuthService{
         lastName: lastName || '',
         email,
         role: 'LANDLORD' as UserRole,
-        avatar: avatar || '',
+        // avatar: avatar || '',
         googleId,
         isEmailVerified: true,
         isActive: true,
         phone: '',
         kycStatus: 'NOT_SUBMITTED',
       };
-      user = await this.landlordRepo.create(newLandlordData);
+      user = await this._landlordRepo.create(newLandlordData);
       logger.info('New landlord created via Google OAuth', { email });
     }else{
       user = existingLandlord; 
@@ -295,14 +211,14 @@ export class AuthService implements IAuthService{
      async landlordSignup(dto: UserSignupDto): Promise<UserSignupResult> {
        logger.info('Landlord signup processing', { email: dto.email });
   
-         const existing = await this.landlordRepo.findByEmail(dto.email)
+         const existing = await this._landlordRepo.findByEmail(dto.email)
   if (existing?.isEmailVerified) {
     logger.warn('Landlord signup blocked - email exists', { email: dto.email });
     throw new AppError(MESSAGES.AUTH.EMAIL_EXISTS, HttpStatus.CONFLICT);
   }
 
   const passwordHash = await bcrypt.hash(dto.password, 10);
-  const landlord = await this.landlordRepo.create({  
+  const landlord = await this._landlordRepo.create({  
     firstName: dto.firstName,
     lastName: dto.lastName,
     email: dto.email,
@@ -317,10 +233,10 @@ export class AuthService implements IAuthService{
     email: dto.email, 
     otpMasked: otp.substring(0, 3) + '***' 
   });
-  await this.redisService.setOtp(landlord.email, otp);
+  await this._redisService.setOtp(landlord.email, otp);
   console.log(`OTP ${otp} sent to ${landlord.email}`);
-  await this.redisService.setResendLock(landlord.email);
-  await this.emailService.sendOtpEmail(landlord.email, otp);
+  await this._redisService.setResendLock(landlord.email);
+  await this._emailService.sendOtpEmail(landlord.email, otp);
   
 
   logger.info('Landlord signup complete', { 
@@ -336,7 +252,7 @@ export class AuthService implements IAuthService{
 
      async verifyTenantOtp(dto:verifyOtpDto):Promise<{ success: boolean }>{
       logger.info('Tenant OTP verification', { email: dto.email });
-          const storedOtp = await this.redisService.getOtp(dto.email)
+          const storedOtp = await this._redisService.getOtp(dto.email)
 
           if (!storedOtp) {
             logger.warn('Tenant OTP verification failed - expired', { email: dto.email });
@@ -352,8 +268,8 @@ export class AuthService implements IAuthService{
           }
 
 
-          await this.redisService.deleteOtp(dto.email)
-         await this.userRepo.updateByEmail(dto.email, {isEmailVerified: true, isActive: true})
+          await this._redisService.deleteOtp(dto.email)
+         await this._userRepo.updateByEmail(dto.email, {isEmailVerified: true, isActive: true})
 
 logger.info('Tenant OTP verified successfully', { email: dto.email });
          return {success:true}
@@ -363,7 +279,7 @@ logger.info('Tenant OTP verified successfully', { email: dto.email });
 
      async verifyLandlordOtp(dto: verifyOtpDto): Promise<verifyLandlordOtpResult> {
       logger.info('Lnadord OTP verification', { email: dto.email });
-  const storedOtp = await this.redisService.getOtp(dto.email);
+  const storedOtp = await this._redisService.getOtp(dto.email);
   if (!storedOtp) {
     logger.warn('Landlord OTP verification failed - expired', { email: dto.email });
     throw new AppError("OTP Expired", HttpStatus.BAD_REQUEST);
@@ -377,13 +293,13 @@ logger.info('Tenant OTP verified successfully', { email: dto.email });
     throw new AppError("Invalid OTP", HttpStatus.BAD_REQUEST);
   }
 
-  await this.redisService.deleteOtp(dto.email);
-  await this.landlordRepo.updateByEmail(dto.email, { 
+  await this._redisService.deleteOtp(dto.email);
+  await this._landlordRepo.updateByEmail(dto.email, { 
     isEmailVerified: true, 
     
   });
 
-  const landlord = await this.landlordRepo.findByEmail(dto.email)
+  const landlord = await this._landlordRepo.findByEmail(dto.email)
   if (!landlord) throw new AppError("Landlord not found", HttpStatus.NOT_FOUND);
 logger.info('Landlord OTP verified successfully', { email: dto.email });
   return {
@@ -399,37 +315,79 @@ logger.info('Landlord OTP verified successfully', { email: dto.email });
 
 
 
-  async resendOtp(dto: resendOtpDto): Promise<{success:boolean}> {
-    logger.info('OTP resend request', { email: dto.email });
-  const existing = await this.userRepo.findByEmail(dto.email);
+//   async resendOtp(dto: resendOtpDto): Promise<{success:boolean}> {
+//     logger.info('OTP resend request', { email: dto.email });
+//   const existing = await this._userRepo.findByEmail(dto.email);
+//   if (!existing) {
+//     logger.warn('OTP resend failed - user not found', { email: dto.email });
+//     throw new AppError("User not found", HttpStatus.NOT_FOUND);
+//   }
+  
+//   // if (existing.isEmailVerified) {
+//   //   throw new AppError(MESSAGES.AUTH.EMAIL_EXISTS, HttpStatus.CONFLICT);
+//   // }
+
+  
+//   const canResend = await this._redisService.canResendOtp(dto.email);
+//   if (!canResend) {
+//     logger.warn('OTP resend blocked - rate limited', { email: dto.email });
+//     throw new AppError("Please wait before requesting new OTP", HttpStatus.TOO_MANY_REQUESTS);
+//   }
+
+//   const otp = Math.floor(100000 + Math.random() * 900000).toString();
+//   logger.debug('OTP regenerated for resend', { 
+//       email: dto.email,
+//       otpMasked: otp.substring(0, 3) + '***' 
+//     });
+//   await this._redisService.setOtp(dto.email, otp);
+//   await this._redisService.setResendLock(dto.email);
+//    console.log(`OTP ${otp} resend to ${dto.email}`);
+
+//   await this._emailService.sendOtpEmail(dto.email, otp);
+// logger.info('OTP resend success', { email: dto.email });
+//   return {success:true};
+// }
+
+async resendOtp(dto: resendOtpDto): Promise<{ success: boolean }> {
+  logger.info('OTP resend request', { email: dto.email });
+
+ 
+  let existing = await this._userRepo.findByEmail(dto.email);
+  
+  
+  if (!existing) {
+    existing = await this._landlordRepo.findByEmail(dto.email);
+  }
+
   if (!existing) {
     logger.warn('OTP resend failed - user not found', { email: dto.email });
     throw new AppError("User not found", HttpStatus.NOT_FOUND);
   }
-  
-  // if (existing.isEmailVerified) {
-  //   throw new AppError(MESSAGES.AUTH.EMAIL_EXISTS, HttpStatus.CONFLICT);
-  // }
 
   
-  const canResend = await this.redisService.canResendOtp(dto.email);
+  const canResend = await this._redisService.canResendOtp(dto.email);
   if (!canResend) {
     logger.warn('OTP resend blocked - rate limited', { email: dto.email });
     throw new AppError("Please wait before requesting new OTP", HttpStatus.TOO_MANY_REQUESTS);
   }
 
+ 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   logger.debug('OTP regenerated for resend', { 
-      email: dto.email,
-      otpMasked: otp.substring(0, 3) + '***' 
-    });
-  await this.redisService.setOtp(dto.email, otp);
-  await this.redisService.setResendLock(dto.email);
-   console.log(`OTP ${otp} resend to ${dto.email}`);
+    email: dto.email,
+    otpMasked: otp.substring(0, 3) + '***' 
+  });
 
-  await this.emailService.sendOtpEmail(dto.email, otp);
-logger.info('OTP resend success', { email: dto.email });
-  return {success:true};
+  await this._redisService.setOtp(dto.email, otp);
+  await this._redisService.setResendLock(dto.email);
+  
+  console.log(`OTP ${otp} resend to ${dto.email}`);
+
+  
+  await this._emailService.sendOtpEmail(dto.email, otp);
+  
+  logger.info('OTP resend success', { email: dto.email, role: existing.role });
+  return { success: true };
 }
 
 
@@ -440,7 +398,7 @@ async submitKyc(
 ): Promise<KycResult> {
    console.log("reached kyc service1")
 
-     const user = await this.landlordRepo.findByEmail(email);
+     const user = await this._landlordRepo.findByEmail(email);
      if (!user) {
       
 
@@ -452,7 +410,7 @@ async submitKyc(
   
   const { aadhaarFront, panCard, aadhaarBack, selfie } = dto.files;
 
-  // 1. S3 Uploads (Service business logic)
+ 
   const [aadhaarFrontUrl, panCardUrl, aadhaarBackUrl, selfieUrl] = await Promise.all([
     uploadToS3(aadhaarFront!, 'kyc/aadhaar', userId),
     uploadToS3(panCard!, 'kyc/pan', userId),
@@ -460,11 +418,11 @@ async submitKyc(
     selfie ? uploadToS3(selfie, 'kyc/selfie', userId) : Promise.resolve(''),
   ]);
 
-  // 2. Validation (Service business rules)
+  
   validateAadhaar(dto.aadhaarNumber);
   validatePan(dto.panNumber);
 
-  // 3. Map to DB format (Service responsibility)
+  
   const dbData: Partial<ILandlord> = {
     kycStatus: 'PENDING',
     kycDetails: {
@@ -480,8 +438,8 @@ async submitKyc(
     kycSubmittedAt: new Date(),
   };
 
-  // 4. Pure DB call
-  const landlord = await this.landlordRepo.updateKyc(userId, dbData);
+ 
+  const landlord = await this._landlordRepo.updateKyc(userId, dbData);
   if (!landlord) throw new AppError('Landlord not found', 404);
  console.log("reached kyc service2",landlord._id.toString())
   
@@ -492,7 +450,7 @@ async getKycStatus(dto: getKycStatusDto): Promise<KycResult> {
   console.log("check11")
   logger.info('Fetching KYC status for email', { email: dto.email });
 
-  const landlord = await this.landlordRepo.findByEmail(dto.email);
+  const landlord = await this._landlordRepo.findByEmail(dto.email);
   if (!landlord) {
     logger.warn('KYC status failed - landlord not found', { email: dto.email });
     throw new AppError('Landlord not found for this email', HttpStatus.NOT_FOUND);
@@ -523,134 +481,11 @@ console.log("check12")
 
 
 
-// async submitLandlordKyc(dto: SubmitKycDto): Promise<KycResponse> {
-//    const landlord = await this.landlordRepo.findByEmail(dto.email);
-//       if (!landlord) {
-//         throw new AppError('Landlord not found', HttpStatus.NOT_FOUND);
-//       }
-
-//        if (landlord.kycStatus !== 'NOT_SUBMITTED') {
-//         throw new AppError(
-//           `KYC already ${landlord.kycStatus.toLowerCase()}`, 
-//           HttpStatus.BAD_REQUEST
-//         );
-//       }
-
-//       const { files } = dto;
-//       const requiredFiles = ['aadhaarFront', 'panCard', 'liveSelfie'] as const;
-      
-//             for (const fileKey of requiredFiles) {
-//         const file = files[fileKey];
-//         if (!file) {
-//           throw new AppError(
-//             `${fileKey.replace(/([A-Z])/g, ' $1')} is required`,
-//             HttpStatus.BAD_REQUEST
-//           );
-//         }
-
-
-//         if (file.size > 5 * 1024 * 1024) {
-//           throw new AppError(
-//             `${fileKey.replace(/([A-Z])/g, ' $1')} too large (max 5MB)`,
-//             HttpStatus.BAD_REQUEST
-//           );
-//         }
-
-//         if (!file.mimetype.startsWith('image/')) {
-//           throw new AppError(
-//             `${fileKey.replace(/([A-Z])/g, ' $1')} must be an image`,
-//             HttpStatus.BAD_REQUEST
-//           );
-//         }
-//       }
-
-
-//       const kycId = `KYC_${uuidv4().slice(0, 8).toUpperCase()}`;
-//      const [aadhaarFront, panCard, liveSelfie, aadhaarBack] = await Promise.all([
-//     uploadToS3(files.aadhaarFront!, `${dto.email}_${kycId}_aadhaar_front.jpg`),
-//     uploadToS3(files.panCard!, `${dto.email}_${kycId}_pan_card.jpg`),
-//     uploadToS3(files.liveSelfie!, `${dto.email}_${kycId}_live_selfie.jpg`),
-//       uploadToS3(files.aadhaarBack, `${dto.email}_${kycId}_aadhaar_back.jpg`)
-      
-//   ]);
-
-
-//    await this.landlordRepo.updateByEmail(dto.email, {
-//     kycStatus: 'PENDING',
-//     kycDetails: {aadhaarNumber: dto.aadhaarNumber,panNumber: dto.panNumber},
-//     kycDocuments: { aadhaarFront, aadhaarBack, panCard, liveSelfie },
-//     kycSubmittedAt: new Date(),
-  
-//   });
-
-
-  
-//       return {
-//         kycId,
-//         status: 'PENDING',
-        
-//       };
-
-
-// }
-
-
-
-//------------------------------------
-//  // ✅ Check KYC status
-//   async checkKycStatus(dto: CheckKycStatusDto): Promise<KycResponse> {
-//     const landlord = await this.landlordRepo.findByEmail(dto.email);
-    
-//     if (!landlord || landlord.kycStatus === 'NOT_SUBMITTED') {
-//       throw new AppError('KYC not found or not submitted', HttpStatus.NOT_FOUND);
-//     }
-
-//     return {
-//       kycId: landlord.kycId || '',
-//       status: landlord.kycStatus as any,
-//       message: this.getKycStatusMessage(landlord.kycStatus),
-//       submittedAt: landlord.kycSubmittedAt!,
-//     };
-//   }
-
-//   // ✅ Admin: Update KYC status
-//   async updateKycStatus(dto: UpdateKycStatusDto): Promise<{ success: boolean }> {
-//     const landlord = await this.landlordRepo.findByKycId(dto.kycId);
-//     if (!landlord) {
-//       throw new AppError('KYC record not found', HttpStatus.NOT_FOUND);
-//     }
-
-//     const updateData: any = { kycStatus: dto.status };
-
-//     if (dto.status === 'APPROVED') {
-//       updateData.isActive = true;
-//       updateData.kycVerifiedAt = new Date();
-//     } else if (dto.status === 'REJECTED') {
-//       updateData.kycRejectedReason = dto.adminNotes || 'No reason provided';
-//       updateData.kycVerifiedAt = new Date();
-//     }
-
-//     await this.landlordRepo.updateById(landlord._id!, updateData);
-//     return { success: true };
-//   }
-
-//   // ✅ Helper method
-//   private getKycStatusMessage(status: string): string {
-//     const messages: Record<string, string> = {
-//       NOT_SUBMITTED: 'KYC not submitted yet',
-//       PENDING: 'Waiting for admin approval',
-//       APPROVED: 'KYC approved! You can now login.',
-//       REJECTED: 'KYC rejected. Please resubmit documents.',
-//     };
-//     return messages[status] || 'Unknown status';
-//   }
-// }
-
 
 
 async tenantLogin(dto:UserLoginDto):Promise<TenantLoginResult>{
 logger.info('Tenant login validation', { email: dto.email });
-   const user = await this.userRepo.findByEmail(dto.email);
+   const user = await this._userRepo.findByEmail(dto.email);
     if (!user) {
        logger.warn('Login failed - user not found', { email: dto.email });
       throw new AppError('Email not exist', HttpStatus.UNAUTHORIZED);
@@ -682,7 +517,7 @@ logger.info('Tenant login validation', { email: dto.email });
  }
  
 
- // Generate tokens
+
   const payload = { userId: user._id, email: user.email, role: user.role };
   const accessToken = jwt.sign(payload, ENV.JWT_ACCESS_SECRET, { expiresIn: '15m' });
   const refreshToken = jwt.sign(payload, ENV.JWT_REFRESH_SECRET, { expiresIn: '7d' });
@@ -697,6 +532,7 @@ logger.info('Tenant login success', { userId: user._id, email: user.email });
       fullName: `${user.firstName} ${user.lastName}`,
       phone : user.phone,
       
+      
      },
     tokens: { accessToken, refreshToken }
   };
@@ -707,7 +543,7 @@ async landlordLogin(dto: UserLoginDto): Promise<TenantLoginResult> {
   logger.info('Landlord login validation', { email: dto.email });
 
 
-  const landlord = await this.landlordRepo.findByEmail(dto.email);
+  const landlord = await this._landlordRepo.findByEmail(dto.email);
   if (!landlord) {
     logger.warn('Login failed - landlord not found', { email: dto.email });
     throw new AppError('Email not exist', HttpStatus.UNAUTHORIZED);
@@ -748,6 +584,11 @@ async landlordLogin(dto: UserLoginDto): Promise<TenantLoginResult> {
       role: landlord.role || 'LANDLORD',
       fullName: `${landlord.firstName} ${landlord.lastName}`,
       phone: landlord.phone,
+     aadharNumber:landlord.kycDetails?.aadhaarNumber || '',
+    panNumber:landlord.kycDetails?.panNumber || '',
+    aadharFrontUrl: landlord.kycDocuments?.aadhaarFront || '',
+    aadharBackUrl: landlord.kycDocuments?.aadhaarBack|| '',
+    panFrontUrl: landlord.kycDocuments?.panCard || ''
       
     },
     tokens: { accessToken, refreshToken }
@@ -759,29 +600,47 @@ async landlordLogin(dto: UserLoginDto): Promise<TenantLoginResult> {
 
 async tenantForgotPassword(dto:forgotPasswordDto):Promise<UserSignupResult>{
    logger.info('Tenant forgot password', { email: dto.email });
-    const tenant = await this.userRepo.findByEmail(dto.email);
-    if (!tenant || !tenant.isEmailVerified || !tenant.isActive) {
+    const tenant = await this._userRepo.findByEmail(dto.email);
+    if (!tenant ) {
         logger.warn('Forgot password failed - invalid user', { 
         email: dto.email,
         exists: !!tenant,
-        verified: tenant?.isEmailVerified,
-        active: tenant?.isActive 
+        
       });
-      throw new AppError('Invalid credentials', HttpStatus.UNAUTHORIZED);
+      throw new AppError('No account found with this email address', HttpStatus.UNAUTHORIZED);
     }
 
+
+      if ( !tenant.isEmailVerified ) {
+        logger.warn('Forgot password failed - invalid email', { 
+        email: dto.email,
+      
+        verified: tenant?.isEmailVerified,
+        
+      });
+      throw new AppError('Email not not verified', HttpStatus.UNAUTHORIZED);
+    }
+
+      if ( !tenant.isActive) {
+        logger.warn('Forgot password failed - invalid user', { 
+        email: dto.email,
+        
+        active: tenant?.isActive 
+      });
+      throw new AppError('Your account is currently inactive', HttpStatus.UNAUTHORIZED);
+    }
     
           const otp = Math.floor(100000+Math.random()*900000).toString()
            logger.debug('Reset OTP generated', { 
       email: dto.email,
       otpMasked: otp.substring(0, 3) + '***' 
     });
-          await this.redisService.setOtp(tenant.email,otp)
+          await this._redisService.setOtp(tenant.email,otp)
           console.log(`OTP ${otp} sent to ${tenant.email}`);
 
-          await this.redisService.setResendLock(tenant.email)
+          await this._redisService.setResendLock(tenant.email)
 
-          await this.emailService.sendOtpEmail(tenant.email, otp);
+          await this._emailService.sendOtpEmail(tenant.email, otp);
     
      logger.info('Forgot password OTP sent', { email: tenant.email });
          return {
@@ -794,45 +653,123 @@ async tenantForgotPassword(dto:forgotPasswordDto):Promise<UserSignupResult>{
 }
 
 
-async tenantResetPassword(dto:resetPasswordDto):Promise<{success:boolean}>{
-  logger.info('Tenant password reset processing', { email: dto.email });
+// async tenantResetPassword(dto:resetPasswordDto):Promise<{success:boolean}>{
+//   logger.info('Tenant password reset processing', { email: dto.email });
+//   console.log("Resetservice1")
+//   const user = await this._userRepo.findByEmail(dto.email);
+//   if (!user) {
+//      logger.warn('Password reset failed - user not found', { email: dto.email });
+//     throw new AppError('User not found', HttpStatus.NOT_FOUND);
+//   }
+
+//    const isSameAsOldPassword = await bcrypt.compare(dto.newPassword, user.passwordHash);
+//   if (isSameAsOldPassword) {
+//     logger.warn('Password reset failed - same as old password', { email: dto.email });
+//     throw new AppError('New password cannot be the same as your old password', HttpStatus.BAD_REQUEST);
+//   }
+//  if (dto.newPassword.length < 8) {
+//     throw new AppError('New password must be at least 8 characters', HttpStatus.BAD_REQUEST);
+//   }
+//   const passwordHash = await bcrypt.hash(dto.newPassword, 10);
+//   await this._userRepo.updateByEmail(dto.email, { passwordHash });
+//   logger.info('Tenant password reset success', { email: dto.email, userId: user._id });
   
-  const user = await this.userRepo.findByEmail(dto.email);
+//     return {success:true}
+
+
+// }
+
+async resetPassword(dto: resetPasswordDto): Promise<{ success: boolean }> {
+  logger.info('Password reset processing', { email: dto.email });
+
+ 
+  let user = await this._userRepo.findByEmail(dto.email);
   if (!user) {
-     logger.warn('Password reset failed - user not found', { email: dto.email });
+    user = await this._landlordRepo.findByEmail(dto.email);
+  }
+
+  if (!user) {
     throw new AppError('User not found', HttpStatus.NOT_FOUND);
   }
 
+  
+  const isSameAsOldPassword = await bcrypt.compare(dto.newPassword, user.passwordHash);
+  if (isSameAsOldPassword) {
+    throw new AppError('New password cannot be the same as your old password', HttpStatus.BAD_REQUEST);
+  }
+  
+  if (dto.newPassword.length < 8) {
+    throw new AppError('New password must be at least 8 characters', HttpStatus.BAD_REQUEST);
+  }
+
+  if (!/[A-Z]/.test(dto.newPassword)) {
+    throw new AppError('Password must contain at least one uppercase letter', HttpStatus.BAD_REQUEST);
+  }
+
+  if (!/[a-z]/.test(dto.newPassword)) {
+    throw new AppError('Password must contain at least one lowercase letter', HttpStatus.BAD_REQUEST);
+  }
+
+  if (!/[0-9]/.test(dto.newPassword)) {
+    throw new AppError('Password must contain at least one number', HttpStatus.BAD_REQUEST);
+  }
+
+  
   const passwordHash = await bcrypt.hash(dto.newPassword, 10);
-  await this.userRepo.updateByEmail(dto.email, { passwordHash });
-  logger.info('Tenant password reset success', { email: dto.email, userId: user._id });
-    return {success:true}
+  
+  if (user.role === 'LANDLORD') {
+    await this._landlordRepo.updateByEmail(dto.email, { passwordHash });
+  } else {
+    await this._userRepo.updateByEmail(dto.email, { passwordHash });
+  }
 
-
+  logger.info('Password reset success', { email: dto.email, userId: user._id, role: user.role });
+  return { success: true };
 }
+
+
 
 async landlordForgotPassword(dto: forgotPasswordDto): Promise<{ email: string; otpSent: boolean }> {
    logger.info('Landlord forgot password', { email: dto.email });
-  const landlord = await this.landlordRepo.findByEmail(dto.email);
-  if (!landlord || !landlord.isEmailVerified || !landlord.isActive) {
-      logger.warn('Forgot password failed - invalid Landlord', { 
+  const landlord = await this._landlordRepo.findByEmail(dto.email);
+   if (!landlord ) {
+        logger.warn('Forgot password failed - invalid user', { 
         email: dto.email,
         exists: !!landlord,
+        
+      });
+      throw new AppError('No account found with this email address', HttpStatus.UNAUTHORIZED);
+    }
+
+
+      if ( !landlord.isEmailVerified ) {
+        logger.warn('Forgot password failed - invalid email', { 
+        email: dto.email,
+      
         verified: landlord?.isEmailVerified,
+        
+      });
+      throw new AppError('Email not not verified', HttpStatus.UNAUTHORIZED);
+    }
+
+      if ( !landlord.isActive) {
+        logger.warn('Forgot password failed - invalid user', { 
+        email: dto.email,
+        
         active: landlord?.isActive 
       });
-    throw new AppError("Invalid email or account not active", HttpStatus.UNAUTHORIZED);
-  }
+      throw new AppError('Your account is currently inactive', HttpStatus.UNAUTHORIZED);
+    }
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
    logger.debug('Reset OTP generated', { 
       email: dto.email,
       otpMasked: otp.substring(0, 3) + '***' 
     });
-  await this.redisService.setOtp(landlord.email, otp);
+  await this._redisService.setOtp(landlord.email, otp);
    console.log(`OTP ${otp} sent to ${landlord.email}`);
-  await this.redisService.setResendLock(landlord.email);
-  await this.emailService.sendOtpEmail(landlord.email, otp);
+  await this._redisService.setResendLock(landlord.email);
+  await this._emailService.sendOtpEmail(landlord.email, otp);
 logger.info('Forgot password OTP sent', { email: landlord.email });
   return {
     email: landlord.email,
@@ -905,41 +842,49 @@ console.log("refresh service2")
   
 // }
 
-async getUser(userId: string, role: string): Promise<UserProfile> {
+async getUser(userId: string, role: string): Promise<BaseUserProfile | LandlordProfile> {
   logger.info('Fetching user profile', { userId, role });
   
-  let user;
+ 
 
-  // ✅ PERFECT - Route to correct repo based on role
+  
   if (role === 'LANDLORD') {
-    user = await this.landlordRepo.findById(userId);
-  } else {
-    // Default to TENANT or throw error for other roles
-    user = await this.userRepo.findById(userId);
+     const landlord = await this._landlordRepo.findById(userId);
+
+  if (!landlord) {
+    throw new AppError('Landlord not found', HttpStatus.NOT_FOUND);
   }
 
-  console.log('getUSER DB user:', user);
+  return {
+    id: landlord._id.toString(),
+    email: landlord.email,
+    role: landlord.role,
+    fullName: `${landlord.firstName} ${landlord.lastName}`.trim(),
+    avatar: landlord.avatar || '',
+    phone: landlord.phone,
+    aadharNumber:landlord.kycDetails?.aadhaarNumber || '',
+    panNumber:landlord.kycDetails?.panNumber || '',
+    aadharFrontUrl: landlord.kycDocuments?.aadhaarFront || '',
+    aadharBackUrl: landlord.kycDocuments?.aadhaarBack|| '',
+    panFrontUrl: landlord.kycDocuments?.panCard || ''
+     
+  };
+  } else {
+    const landlord = await this._landlordRepo.findById(userId);
 
-  if (!user) {
-    logger.warn('User profile not found', { userId, role });
+  if (!landlord) {
     throw new AppError('User not found', HttpStatus.NOT_FOUND);
   }
 
-  logger.debug('User profile fetched', { 
-    userId: user._id,
-    email: user.email,
-    role: user.role 
-  });
-
   return {
-    id: user._id.toString(),
-    email: user.email,
-    role: user.role as 'TENANT' | 'LANDLORD',
-    fullName: `${user.firstName} ${user.lastName}`.trim(),
-    avatar: user.avatar || '',
-    phone: user.phone,
-     
-  };
+    id: landlord._id.toString(),
+    email: landlord.email,
+    role: landlord.role,
+    fullName: `${landlord.firstName} ${landlord.lastName}`.trim(),
+    avatar: landlord.avatar || '',
+    phone: landlord.phone,
+}
+  }
 }
 
 
@@ -952,7 +897,7 @@ async editTenantProfile(dto:editTenantProfileDto,userId: string):Promise<{ user:
   });
 
   console.log("go from service1")
-  const tenant = await this.userRepo.findById(userId);
+  const tenant = await this._userRepo.findById(userId);
   if (!tenant) {
     logger.warn('Profile edit failed - tenant not found', { userId });
     throw new AppError('Tenant not found', HttpStatus.NOT_FOUND);
@@ -968,7 +913,7 @@ async editTenantProfile(dto:editTenantProfileDto,userId: string):Promise<{ user:
   };
 
 
-  const updatedTenant = await this.userRepo.update(userId, updateData);
+  const updatedTenant = await this._userRepo.update(userId, updateData);
 
 
  if (!updatedTenant) {
@@ -1005,7 +950,7 @@ async editLandlordProfile(dto: editLandlordProfileDto, userId: string): Promise<
 
    console.log("hybyservice1")
   
-  const landlord = await this.landlordRepo.findById(userId);
+  const landlord = await this._landlordRepo.findById(userId);
   if (!landlord) {
     logger.warn('Profile edit failed - landlord not found', { userId });
     throw new AppError('Landlord not found', HttpStatus.NOT_FOUND);
@@ -1019,7 +964,7 @@ async editLandlordProfile(dto: editLandlordProfileDto, userId: string): Promise<
     updatedAt: new Date(),
   };
 
-  const updatedLandlord = await this.landlordRepo.update(userId, updateData);
+  const updatedLandlord = await this._landlordRepo.update(userId, updateData);
 
   if (!updatedLandlord) {
     logger.warn('Profile edit failed - landlord not found', { userId });
@@ -1052,7 +997,7 @@ async changeTenantPassword(dto: changePasswordDto, userId: string): Promise<{ us
     newPasswordLength: dto.newPassword.length 
   });
 
-  const tenant = await this.userRepo.findById(userId);
+  const tenant = await this._userRepo.findById(userId);
   console.log("password service1",tenant)
   if (!tenant) {
     logger.warn('Password change failed - tenant not found', { userId });
@@ -1066,17 +1011,17 @@ async changeTenantPassword(dto: changePasswordDto, userId: string): Promise<{ us
     throw new AppError('Current password is incorrect', HttpStatus.BAD_REQUEST);
   }
 
-  // ✅ CHECK NEW PASSWORD MATCH
+  
   if (dto.newPassword !== dto.confirmPassword) {
     throw new AppError('New passwords do not match', HttpStatus.BAD_REQUEST);
   }
 
-  // ✅ PASSWORD STRENGTH VALIDATION
+  
   if (dto.newPassword.length < 8) {
     throw new AppError('New password must be at least 8 characters', HttpStatus.BAD_REQUEST);
   }
 
-  // ✅ HASH NEW PASSWORD
+  
   const hashedPassword = await bcrypt.hash(dto.newPassword, 12);
 
   const updateData: Partial<ITenant> = {
@@ -1084,7 +1029,7 @@ async changeTenantPassword(dto: changePasswordDto, userId: string): Promise<{ us
     updatedAt: new Date(),
   };
 
-  const updatedTenant = await this.userRepo.update(userId, updateData);
+  const updatedTenant = await this._userRepo.update(userId, updateData);
 
   if (!updatedTenant) {
     logger.warn('Password change failed - tenant not found', { userId });
@@ -1119,7 +1064,7 @@ async changeLandlordPassword(dto: changePasswordDto, userId: string): Promise<{ 
 
    console.log("changeservice1")
 
-  const landlord = await this.landlordRepo.findById(userId);
+  const landlord = await this._landlordRepo.findById(userId);
   console.log("password service1",landlord)
   if (!landlord) {
     logger.warn('Password change failed - landlord not found', { userId });
@@ -1133,17 +1078,16 @@ async changeLandlordPassword(dto: changePasswordDto, userId: string): Promise<{ 
     throw new AppError('Current password is incorrect', HttpStatus.BAD_REQUEST);
   }
 
-  // ✅ CHECK NEW PASSWORD MATCH
+
   if (dto.newPassword !== dto.confirmPassword) {
     throw new AppError('New passwords do not match', HttpStatus.BAD_REQUEST);
   }
 
-  // ✅ PASSWORD STRENGTH VALIDATION
   if (dto.newPassword.length < 8) {
     throw new AppError('New password must be at least 8 characters', HttpStatus.BAD_REQUEST);
   }
 
-  // ✅ HASH NEW PASSWORD
+  
   const hashedPassword = await bcrypt.hash(dto.newPassword, 12);
 
   const updateData: Partial<ILandlord> = {
@@ -1151,7 +1095,7 @@ async changeLandlordPassword(dto: changePasswordDto, userId: string): Promise<{ 
     updatedAt: new Date(),
   };
 
-  const updatedLandlord = await this.landlordRepo.update(userId, updateData);
+  const updatedLandlord = await this._landlordRepo.update(userId, updateData);
 
   if (!updatedLandlord) {
     logger.warn('Password change failed - landlord not found', { userId });
@@ -1181,28 +1125,28 @@ async changeLandlordPassword(dto: changePasswordDto, userId: string): Promise<{ 
 async adminLogin(dto: UserLoginDto): Promise<AdminLoginResult> {
   logger.info('Admin login validation', { email: dto.email });
   
-  // Use AdminRepository (separate from tenant)
-  const admin = await this.adminRepo.findByEmail(dto.email);
+  
+  const admin = await this._adminRepo.findByEmail(dto.email);
   
   if (!admin) {
     logger.warn('Admin login failed - admin not found', { email: dto.email });
-    throw new AppError('Invalid credentials', HttpStatus.UNAUTHORIZED);
+    throw new AppError('Invalid Email', HttpStatus.UNAUTHORIZED);
   }
 
-  // Admin-specific checks
+  
   if (!admin.isActive) {
     logger.warn('Admin login failed - inactive admin', { email: dto.email });
     throw new AppError('Account is inactive. Contact support.', HttpStatus.UNAUTHORIZED);
   }
 
-  // Password validation
+  
   const isValidPassword = await bcrypt.compare(dto.password, admin.passwordHash);
   if (!isValidPassword) {
     logger.warn('Admin login failed - wrong password', { email: dto.email });
-    throw new AppError('Invalid credentials', HttpStatus.UNAUTHORIZED);
+    throw new AppError('Wrong Password', HttpStatus.UNAUTHORIZED);
   }
 
-  // Generate tokens (same payload structure)
+  
   const payload = { 
     userId: admin._id, 
     email: admin.email, 

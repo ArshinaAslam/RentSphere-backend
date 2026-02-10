@@ -4,8 +4,7 @@ import authRoutes from "./modules/auth/routes/auth.routes";
 import { globalErrorHandler } from "./middleware/error.middleware";
 import cookieParser from "cookie-parser";
 import userRoutes from './modules/user/routes/users.routes';
-// import landlordRoutes from './routes/landlordRoutes';
-// import adminRoutes from './routes/adminRoutes'
+
 
 const app = express();
 

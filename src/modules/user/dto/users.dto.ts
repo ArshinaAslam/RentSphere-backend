@@ -15,7 +15,7 @@ export interface GetLandlordDetailsDto {
 }
 
 
-// ✅ CREATE LandlordDetailsDto (same structure as frontend expects)
+
 export interface LandlordDetailsDto {
   id: string;
   landlordId: string;

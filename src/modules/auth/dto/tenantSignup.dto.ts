@@ -79,29 +79,6 @@ export interface SubmitLandlordKycDto {
 }
 
 
-// export interface KycFile {
-//   fieldname: string;
-//   originalname: string;
-//   encoding: string;
-//   mimetype: string;
-//   size: number;
-//   buffer: Buffer;
-// }
-
-// export interface SubmitKycDto {
-//   email: string;
-//   firstName: string;
-//   lastName: string;
-//   phone: string;
-//   aadhaarNumber: string;
-//   panNumber: string;
-//   files: {
-//     aadhaarFront:   KycFile | null;
-//     aadhaarBack:  KycFile | null;
-//     panCard:      KycFile | null;
-//     liveSelfie:   KycFile | null;
-//   };
-// }
 
 
 

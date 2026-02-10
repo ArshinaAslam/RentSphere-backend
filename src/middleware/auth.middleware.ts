@@ -27,7 +27,7 @@ export const authenticateToken = (
 ): void => {
   const accessToken = req.cookies?.accessToken;  
 
-  console.log(req.url)
+  console.log("authmiddleware url",req.url)
   
   if (!accessToken) {
    throw new AppError('Access denied. No token provided.', HttpStatus.UNAUTHORIZED)

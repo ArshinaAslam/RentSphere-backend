@@ -16,33 +16,8 @@ export class UserController {
     private readonly userService: IUserService,
   ) {}
 
-  // async getUsers(req: Request, res: Response): Promise<Response> {
-  //   logger.info('Admin users list request', { 
-  //     query: req.query,
-  //     ip: req.ip 
-  //   });
- 
-  //   const dto: GetUsersDto = {
-  //     search: req.query.search as string,
-  //      role: req.query.role as 'TENANT' | 'LANDLORD',
-  //     page: Number(req.query.page) || 1,
-  //     limit: Number(req.query.limit) || 10,
-  //   };
-
-  //   const data = await this.userService.getUsers(dto);
-
-  //   logger.info('Admin users list SUCCESS', { 
-  //     count: data.users.length,
-  //     total: data.total 
-  //   });
-  
-  //   return res.status(HttpStatus.OK).json(
-  //     new ApiResponses(true, MESSAGES.USERS.FETCH_SUCCESS, data)
-  //   );
-  // }
 
 
-  // ✅ TENANTS ONLY
   async getTenants(req: Request, res: Response): Promise<Response> {
     logger.info('Admin tenant list request', { query: req.query, ip: req.ip });
 
@@ -52,7 +27,7 @@ export class UserController {
       limit: Number(req.query.limit) || 10,
     };
 
-    const data = await this.userService.getTenants(dto);  // ✅ Tenant-specific!
+    const data = await this.userService.getTenants(dto);  
 
     logger.info('Admin tenant list SUCCESS', { count: data.users.length, total: data.total });
     return res.status(HttpStatus.OK).json(
@@ -60,7 +35,7 @@ export class UserController {
     );
   }
 
-  // ✅ LANDLORDS ONLY
+ 
   async getLandlords(req: Request, res: Response): Promise<Response> {
     logger.info('Admin landlord list request', { query: req.query, ip: req.ip });
 
@@ -70,7 +45,7 @@ export class UserController {
       limit: Number(req.query.limit) || 10,
     };
 
-    const data = await this.userService.getLandlords(dto);  // ✅ Landlord-specific!
+    const data = await this.userService.getLandlords(dto);  
 
     logger.info('Admin landlord list SUCCESS', { count: data.users.length, total: data.total });
     return res.status(HttpStatus.OK).json(
@@ -80,7 +55,7 @@ export class UserController {
 
 
 
-  // ✅ ADD THIS METHOD to your UserController class
+
 async getLandlordDetails(req: Request, res: Response): Promise<Response> {
   console.log("signlecontroller 1",req.params.id)
   logger.info('Admin single landlord request', { 

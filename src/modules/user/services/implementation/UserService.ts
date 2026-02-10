@@ -229,44 +229,7 @@ console.log("siglelandlorddeatils",landlordDetails)
   return landlordDetails;
 }
 
-//   async toggleUserStatus(
-//     id: string,
-//     dto: ToggleUserStatusDto
-//   ): Promise<UserStatusResult> {
-//     logger.info('Admin toggling user status', { userId: id, status: dto.status });
-//     console.log("a1",id)
-     
-//   if (!Types.ObjectId.isValid(id)) {
-//     throw new AppError('Invalid user ID', HttpStatus.BAD_REQUEST);
-//   }
-//     console.log("b2")
-//     const user = await this.userRepo.findById(id);
-//    console.log("c3",user)
-//     if (!user || (user.role !== 'TENANT' && user.role !== 'LANDLORD')) {
-//       throw new AppError('User not found', HttpStatus.NOT_FOUND);
-//     }
-//     console.log(dto.status === 'active',":::::::::::::::::::dto status")
-//     console.log()
-//     const updatedUser = await this.userRepo.updateUserById(id, {
-//       isActive: dto.status === 'active',
-//     });
 
-//     if (!updatedUser) {
-//       throw new AppError('Failed to update user', HttpStatus.INTERNAL_SERVER_ERROR);
-//     }
-// console.log("go from toggle")
-//     return {
-//       id: updatedUser._id.toString(),
-//       userId: `USR-${updatedUser._id.toString().slice(-4).padStart(4, '0')}`,
-//       fullName: `${updatedUser.firstName} ${updatedUser.lastName}`,
-//       status: updatedUser.isActive ? 'active' : 'blocked',
-//     };
-//   }
-
-
-
-
-// ✅ APPROVE KYC SERVICE (SETS isActive: true!)
 async approveLandlordKyc(landlordId: string): Promise<LandlordDetailsDto> {
   console.log("Service: Approving KYC for:", landlordId);
   
@@ -314,11 +277,11 @@ async toggleUserStatus(
     throw new AppError('Invalid user ID', HttpStatus.BAD_REQUEST);
   }
 
-  // ✅ STEP 1: Try TENANT first
+ 
   let user = await this.tenantRepo.findById(id);
   
   if (user && user.role === 'TENANT') {
-    // ✅ TENANT found → Update tenant
+
     const updatedUser = await this.tenantRepo.updateUserById(id, {
       isActive: dto.status === 'active',
     });
@@ -336,11 +299,11 @@ async toggleUserStatus(
     };
   }
 
-  // ✅ STEP 2: Try LANDLORD (if tenant not found)
+ 
   user = await this.landlordRepo.findById(id);
   
   if (user && user.role === 'LANDLORD') {
-    // ✅ LANDLORD found → Update landlord
+   
     const updatedUser = await this.landlordRepo.updateLandlordById(id, {
       isActive: dto.status === 'active',
     });
@@ -358,7 +321,7 @@ async toggleUserStatus(
     };
   }
 
-  // ✅ STEP 3: Neither found
+ 
   throw new AppError('User not found', HttpStatus.NOT_FOUND);
 }
 

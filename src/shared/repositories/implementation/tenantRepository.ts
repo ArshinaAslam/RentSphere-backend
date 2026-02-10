@@ -1,5 +1,5 @@
-// ✅ Remove Query import - use Promise only!
-import { FilterQuery,Query } from 'mongoose';  // ✅ Only this!
+
+import { FilterQuery,Query } from 'mongoose';  
 import { ITenantRepository } from '../interface/ITenantRepository';
 
 import { injectable } from "tsyringe";

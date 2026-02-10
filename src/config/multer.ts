@@ -11,7 +11,7 @@ export const uploadImage = multer({
 });
 
 
-// ✅ Multiple file upload middleware
+// Multiple file upload middleware
 export const uploadKycImages = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
@@ -28,30 +28,11 @@ export const uploadKycImages = multer({
 ]);
 
 
-// export const uploadDocument = multer({
-//   storage: multer.memoryStorage(),
-//   limits: { fileSize: 10 * 1024 * 1024 },
-//   fileFilter: (req, file, cb) => {
-//     const allowed = ['application/pdf', 'application/msword'];
-//     if (allowed.includes(file.mimetype)) cb(null, true);
-//     else cb(new Error('Only PDF/DOC'), false);
-//   },
-// });
 
 
 
-// export const uploadKyc = multer({
-//   storage: multer.memoryStorage(),
-//   limits: { fileSize: 10 * 1024 * 1024 },  // 10MB for KYC
-//   fileFilter: (req, file, cb) => {
-//     const allowed = ['image/jpeg', 'image/png', 'image/pdf', 'application/pdf'];
-//     if (allowed.includes(file.mimetype)) {
-//       cb(null, true);
-//     } else {
-//       cb(new Error('KYC: JPG/PNG/PDF only') as any, false);
-//     }
-//   },
-// });
+
+
 
 
 
