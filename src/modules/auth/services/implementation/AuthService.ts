@@ -185,7 +185,7 @@ export class AuthService implements IAuthService{
     role: user.role 
   };
   
-  const accessToken = jwt.sign(payloadJwt, ENV.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+  const accessToken = jwt.sign(payloadJwt, ENV.JWT_ACCESS_SECRET, { expiresIn: '3m' });
   const refreshToken = jwt.sign(payloadJwt, ENV.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
   logger.info('Google OAuth complete', { 
@@ -519,7 +519,7 @@ logger.info('Tenant login validation', { email: dto.email });
 
 
   const payload = { userId: user._id, email: user.email, role: user.role };
-  const accessToken = jwt.sign(payload, ENV.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+  const accessToken = jwt.sign(payload, ENV.JWT_ACCESS_SECRET, { expiresIn: '3m' });
   const refreshToken = jwt.sign(payload, ENV.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
 logger.info('Tenant login success', { userId: user._id, email: user.email });
@@ -572,7 +572,7 @@ async landlordLogin(dto: UserLoginDto): Promise<TenantLoginResult> {
     role: 'LANDLORD'  
   };
   
-  const accessToken = jwt.sign(payload, ENV.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+  const accessToken = jwt.sign(payload, ENV.JWT_ACCESS_SECRET, { expiresIn: '3m' });
   const refreshToken = jwt.sign(payload, ENV.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
   logger.info('Landlord login success', { userId: landlord._id, email: landlord.email });
@@ -793,7 +793,7 @@ console.log("refresh service1",refreshToken)
   const newAccessToken = jwt.sign(
     payload,
     ENV.JWT_ACCESS_SECRET,
-    {expiresIn:'15m'}
+    {expiresIn:'3m'}
   )
 
 logger.info('Token refresh success', { userId: decoded.userId });
@@ -807,86 +807,108 @@ console.log("refresh service2")
 }
 
 
-// async getUser(userId: string): Promise<UserProfile> {
-  
-//     logger.info('Fetching user profile', { userId });
-//     const user = await this.userRepo.findById(userId);
-//     console.log('getUSER DB user:', user);
-    
-//     if (!user) {
-//       logger.warn('User profile not found', { userId });
-//       throw new AppError('User not found', HttpStatus.NOT_FOUND);
-//     }
 
-
-
-    
-
-//       logger.debug('User profile fetched', { 
-//       userId: user._id,
-//       email: user.email,
-//       role: user.role 
-      
-
-//     });
-// console.log("go from getuser")
-
-//     return {
-//       id: user._id.toString(),
-//       email: user.email,
-//       role: user.role as 'TENANT' | 'LANDLORD',
-//       fullName: `${user.firstName} ${user.lastName}`.trim(),
-//       avatar: user.avatar || '',
-//       phone:user.phone
-//     };
-  
-// }
-
-async getUser(userId: string, role: string): Promise<BaseUserProfile | LandlordProfile> {
-  logger.info('Fetching user profile', { userId, role });
+// async getUser(userId: string, role: string): Promise<BaseUserProfile | LandlordProfile> {
+//   logger.info('Fetching user profile', { userId, role });
   
  
 
   
-  if (role === 'LANDLORD') {
-     const landlord = await this._landlordRepo.findById(userId);
+//   if (role === 'LANDLORD') {
+//      const landlord = await this._landlordRepo.findById(userId);
 
-  if (!landlord) {
-    throw new AppError('Landlord not found', HttpStatus.NOT_FOUND);
-  }
+//   if (!landlord) {
+//     throw new AppError('Landlord not found', HttpStatus.NOT_FOUND);
+//   }
 
-  return {
-    id: landlord._id.toString(),
-    email: landlord.email,
-    role: landlord.role,
-    fullName: `${landlord.firstName} ${landlord.lastName}`.trim(),
-    avatar: landlord.avatar || '',
-    phone: landlord.phone,
-    aadharNumber:landlord.kycDetails?.aadhaarNumber || '',
-    panNumber:landlord.kycDetails?.panNumber || '',
-    aadharFrontUrl: landlord.kycDocuments?.aadhaarFront || '',
-    aadharBackUrl: landlord.kycDocuments?.aadhaarBack|| '',
-    panFrontUrl: landlord.kycDocuments?.panCard || ''
+//   return {
+//     id: landlord._id.toString(),
+//     email: landlord.email,
+//     role: landlord.role,
+//     fullName: `${landlord.firstName} ${landlord.lastName}`.trim(),
+//     avatar: landlord.avatar || '',
+//     phone: landlord.phone,
+//     aadharNumber:landlord.kycDetails?.aadhaarNumber || '',
+//     panNumber:landlord.kycDetails?.panNumber || '',
+//     aadharFrontUrl: landlord.kycDocuments?.aadhaarFront || '',
+//     aadharBackUrl: landlord.kycDocuments?.aadhaarBack|| '',
+//     panFrontUrl: landlord.kycDocuments?.panCard || ''
      
-  };
-  } else {
+//   };
+//   } else {
+//     const landlord = await this._landlordRepo.findById(userId);
+
+//   if (!landlord) {
+//     throw new AppError('User not found', HttpStatus.NOT_FOUND);
+//   }
+
+//   return {
+//     id: landlord._id.toString(),
+//     email: landlord.email,
+//     role: landlord.role,
+//     fullName: `${landlord.firstName} ${landlord.lastName}`.trim(),
+//     avatar: landlord.avatar || '',
+//     phone: landlord.phone,
+// }
+//   }
+// }
+
+async getUser(userId: string, role: string): Promise<BaseUserProfile | LandlordProfile> {
+  logger.info('Fetching user profile', { userId, role });
+
+  if (role === 'ADMIN') {
+    const admin = await this._adminRepo.findById(userId);
+    if (!admin) {
+      throw new AppError('Admin not found', HttpStatus.NOT_FOUND);
+    }
+    return {
+      id: admin._id.toString(),
+      email: admin.email,
+      role: admin.role,
+      fullName:  'Admin',
+      
+    };
+  }
+
+  if (role === 'LANDLORD') {
     const landlord = await this._landlordRepo.findById(userId);
-
-  if (!landlord) {
-    throw new AppError('User not found', HttpStatus.NOT_FOUND);
+    if (!landlord) {
+      throw new AppError('Landlord not found', HttpStatus.NOT_FOUND);
+    }
+    return {
+      id: landlord._id.toString(),
+      email: landlord.email,
+      role: landlord.role,
+      fullName: `${landlord.firstName || ''} ${landlord.lastName || ''}`.trim(),
+      avatar: landlord.avatar || '',
+      phone: landlord.phone || '',
+      aadharNumber: landlord.kycDetails?.aadhaarNumber || '',
+      panNumber: landlord.kycDetails?.panNumber || '',
+      aadharFrontUrl: landlord.kycDocuments?.aadhaarFront || '',
+      aadharBackUrl: landlord.kycDocuments?.aadhaarBack || '',
+      panFrontUrl: landlord.kycDocuments?.panCard || ''
+    };
   }
 
-  return {
-    id: landlord._id.toString(),
-    email: landlord.email,
-    role: landlord.role,
-    fullName: `${landlord.firstName} ${landlord.lastName}`.trim(),
-    avatar: landlord.avatar || '',
-    phone: landlord.phone,
-}
+  if (role === 'TENANT') {
+    const tenant = await this._userRepo.findById(userId);
+    if (!tenant) {
+      throw new AppError('Tenant not found', HttpStatus.NOT_FOUND);
+    }
+    return {
+      id: tenant._id.toString(),
+      email: tenant.email,
+      role: tenant.role,
+      fullName: `${tenant.firstName || ''} ${tenant.lastName || ''}`.trim(),
+      avatar: tenant.avatar || '',
+      phone: tenant.phone || '',
+    };
   }
-}
 
+ 
+  logger.error('Unknown role', { role, userId });
+  throw new AppError('Invalid role', HttpStatus.BAD_REQUEST);
+}
 
 
 async editTenantProfile(dto:editTenantProfileDto,userId: string):Promise<{ user: UserProfile }> {
@@ -1152,7 +1174,7 @@ async adminLogin(dto: UserLoginDto): Promise<AdminLoginResult> {
     email: admin.email, 
     role: 'ADMIN' 
   };
-  const accessToken = jwt.sign(payload, ENV.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+  const accessToken = jwt.sign(payload, ENV.JWT_ACCESS_SECRET, { expiresIn: '3m' });
   const refreshToken = jwt.sign(payload, ENV.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
   logger.info('Admin login success', { userId: admin._id, email: admin.email });

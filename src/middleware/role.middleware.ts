@@ -55,4 +55,5 @@ export const tenantOnly = authorizeRole('TENANT');
 export const landlordOnly = authorizeRole('LANDLORD');
 export const adminOnly = authorizeRole('ADMIN');
 export const tenantOrLandlord = authorizeRole('TENANT', 'LANDLORD');
+export const forAll = authorizeRole('TENANT', 'LANDLORD','ADMIN');
 

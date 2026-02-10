@@ -5,7 +5,7 @@ import { asyncHandler } from '../../../middleware/asyncHandler';
 
 import { authenticateToken } from '../../../middleware/auth.middleware';
 import { uploadImage, uploadKycImages } from '../../../config/multer';
-import { landlordOnly, tenantOnly, tenantOrLandlord } from '../../../middleware/role.middleware';
+import { forAll, landlordOnly, tenantOnly, tenantOrLandlord } from '../../../middleware/role.middleware';
 
 
 const router = Router()
@@ -60,7 +60,7 @@ router.post('/landlord/forgot-password',asyncHandler(authController.landlordForg
 
 router.post('/resend-otp',asyncHandler(authController.resendOtp.bind(authController)))
 router.post('/refresh',asyncHandler(authController.refreshToken.bind(authController)))
-router.get('/me', authenticateToken,tenantOrLandlord, asyncHandler(authController.getMe.bind(authController)));
+router.get('/me', authenticateToken,forAll, asyncHandler(authController.getMe.bind(authController)));
 router.post('/logout',authenticateToken,asyncHandler(authController.logout.bind(authController)))
 // router.get('/dashboard', authenticateToken, asyncHandler(controller.getDashboard));
 

@@ -97,7 +97,7 @@ export class AuthController implements IAuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000,
+      maxAge: 3 * 60 * 1000,
     });
 
     res.cookie("refreshToken", result.tokens.refreshToken, {
@@ -189,14 +189,14 @@ export class AuthController implements IAuthController {
       email: result.user.email,
     });
 
-    res.cookie("accessToken", result.tokens.accessToken, {
+    res.cookie("tenantAccessToken", result.tokens.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000,
+      maxAge: 3 * 60 * 1000,
     });
 
-    res.cookie("refreshToken", result.tokens.refreshToken, {
+    res.cookie("tenantRefreshToken", result.tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
@@ -232,14 +232,14 @@ export class AuthController implements IAuthController {
       email: result.user.email,
     });
 
-    res.cookie("accessToken", result.tokens.accessToken, {
+    res.cookie("landlordAccessToken", result.tokens.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000,
+      maxAge: 3 * 60 * 1000,
     });
 
-    res.cookie("refreshToken", result.tokens.refreshToken, {
+    res.cookie("landlordRefreshToken", result.tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
@@ -321,7 +321,7 @@ export class AuthController implements IAuthController {
 
   async refreshToken(req: Request, res: Response): Promise<Response> {
     logger.info("Token refresh request");
-    console.log("refresh cpmtroller1", req.cookies.refreshToken);
+    console.log("refresh cpmtroller1", req.cookies);
     const refreshToken = req.cookies.refreshToken;
     console.log("refreshToken", refreshToken);
     if (!refreshToken) {
@@ -334,7 +334,7 @@ export class AuthController implements IAuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000,
+      maxAge: 3 * 60 * 1000,
     });
     console.log("refresh cpmtroller2");
     logger.info("Token refresh SUCCESS");
@@ -343,11 +343,15 @@ export class AuthController implements IAuthController {
       .json(new ApiResponses(true, "Token refreshed", { success: true }));
   }
 
-  async logout(req: Request, res: Response): Promise<Response> {
+  async logout(req: AuthRequest, res: Response): Promise<Response> {
     logger.info("Logout request", {
       ip: req.ip,
     });
-    res.clearCookie("accessToken", {
+
+    const role = req.user?.role
+
+    if(role === 'ADMIN'){
+       res.clearCookie("adminAccessToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
@@ -355,13 +359,51 @@ export class AuthController implements IAuthController {
       maxAge: 0,
     });
 
-    res.clearCookie("refreshToken", {
+    res.clearCookie("adminRefreshToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       path: "/",
       maxAge: 0,
     });
+    }else if(role === 'LANDLORD'){
+       res.clearCookie("landlordAccessToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: 0,
+    });
+
+    res.clearCookie("landlordRefreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: 0,
+    });
+
+    }else {
+
+
+       res.clearCookie("tenantAccessToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: 0,
+    });
+
+    res.clearCookie("tenantRefreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: 0,
+    });
+
+    }
+   
 
     logger.info("Logout SUCCESS");
 
@@ -588,14 +630,14 @@ export class AuthController implements IAuthController {
       email: result.user.email,
     });
 
-    res.cookie("accessToken", result.tokens.accessToken, {
+    res.cookie("adminAccessToken", result.tokens.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000,
+      maxAge: 3 * 60 * 1000,
     });
 
-    res.cookie("refreshToken", result.tokens.refreshToken, {
+    res.cookie("adminRefreshToken", result.tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
