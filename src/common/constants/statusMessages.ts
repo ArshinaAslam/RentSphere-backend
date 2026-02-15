@@ -2,7 +2,7 @@
 export const MESSAGES = {
   AUTH: {
     TENANT_SIGNUP_SUCCESS: "Tenant signup successful",
-    EMAIL_EXISTS: 'Email already exists',
+    EMAIL_EXISTS: 'Email already exists', 
     SIGNUP_SUCCESS: 'User created successfully',
     SIGNUP_FAILED: "Signup failed",
     USER_NOT_FOUND: "User not found",

@@ -1,9 +1,14 @@
 import express from "express";
 import cors from "cors";
-import authRoutes from "./modules/auth/routes/auth.routes";
+
 import { globalErrorHandler } from "./middleware/error.middleware";
 import cookieParser from "cookie-parser";
-import userRoutes from './modules/user/routes/users.routes';
+import tenantRoutes from './routes/tenantRoutes';
+
+import landlordRoutes from './routes/landlordRoutes';
+
+import adminRoutes from './routes/adminRoutes'
+
 
 
 const app = express();
@@ -20,11 +25,12 @@ app.use(
 
 app.use(express.json());
 
+ app.use("/api/admin",adminRoutes)
+app.use("/api/landlord",landlordRoutes)
+ app.use("/api/tenant",tenantRoutes)
 
- app.use("/api/auth",authRoutes);
- app.use("/api/user",userRoutes)
  app.use(globalErrorHandler)
 
-// app.use("/api/admin",adminRoutes)
+
 
 export default app;
