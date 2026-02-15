@@ -1,12 +1,28 @@
+import { AdminAuthController } from "../../controllers/implementation/admin/admin.auth.controller";
+import { LandlordProfileController } from "../../controllers/implementation/landlord/landlord.profile.controller";
 
 
 export const DI_TYPES = {
-    AuthService : Symbol('AuthService'),
     TenantRepository : Symbol('TenantRepository'),
-    RedisService : Symbol('RedisService'),
-    EmailService : Symbol('EmailService'),
-    LandlordRepository : Symbol('LandlordRepository'),
-    AdminRepository : Symbol('AdminRepository'),
-    UserService: Symbol('UserService'),
-    UserRepository:Symbol('UserRepository')
+     TenantAuthService : Symbol('TenantAuthService'),
+    TenantProfileService:Symbol('TenantProfileService'),
+     TenantAuthController : Symbol('TenantAuthController'),
+    TenantProfileController :Symbol('TenantProfileController'),
+
+
+     LandlordRepository : Symbol('LandlordRepository'),
+     LandlordAuthService : Symbol('LandlordAuthService'),
+     LandlordProfileService : Symbol('LandlordProfileService'),
+     LandlordAuthController : Symbol('LandlordAuthController'),
+     LandlordProfileController : Symbol('LandlordProfileController'),
+
+     AdminRepository : Symbol('AdminRepository'),
+     AdminAuthService : Symbol('AdminAuthService'),
+     AdminAuthController: Symbol('AdminAuthController'),
+    
+     RedisService : Symbol('RedisService'),
+     EmailService : Symbol('EmailService'),
+       
+   
+   
 }as const
