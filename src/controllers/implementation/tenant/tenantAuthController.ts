@@ -36,6 +36,7 @@ export class TenantAuthController implements ITenantAuthController {
       role: req.body.role,
     };
     const data = await this._tenantAuthService.tenantSignup(dto);
+    console.log("user data:",data)
 
     logger.info("Tenant signup SUCCESS", {
       email: data.email,
