@@ -3,7 +3,7 @@ import { UserRole } from "../../types/auth.types";
 
 
 
-export interface LandlordSignupDto  {
+export interface SignupDto  {
     firstName : string ;
     lastName : string ;
     email : string ;
@@ -16,6 +16,7 @@ export interface LandlordSignupDto  {
 export interface verifyOtpDto {
     otp :string ;
     email:string ;
+    role:UserRole;
 }
 
 
@@ -23,23 +24,27 @@ export interface verifyOtpDto {
 
 export interface resendOtpDto{
     email:string;
+    role:UserRole;
 }
 
-export interface LandlordLoginDto{
+export interface LoginDto{
     email:string;
     password:string;
+    role:UserRole;
 }
 
 
 
 
 export interface forgotPasswordDto{
-    email:string
+    email:string;
+    role:UserRole;
 }
 
 export interface resetPasswordDto{
     newPassword : string;
     email : string;
+    role:UserRole;
 }
 
 

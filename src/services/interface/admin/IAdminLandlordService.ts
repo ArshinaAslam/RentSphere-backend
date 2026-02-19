@@ -1,0 +1,32 @@
+import { GetUsersDto, LandlordDetailsDto, ToggleUserStatusDto } from '../../../dto/admin/admin.user.dto';
+
+export interface LandlordListResult {
+  users: Array<{
+    id: string;
+    tenantId: string;
+    fullName: string;
+    email: string;
+    phone: string;
+    status: 'active' | 'blocked';
+    kycStatus: string;
+    // joinedAt: string;
+  }>;
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+export interface LandlordStatusResult {
+  id: string;
+  userId: string;
+  fullName: string;
+  status: 'active' | 'blocked';
+}
+export interface IAdminLandlordService {
+ 
+  getLandlords(dto: GetUsersDto): Promise<LandlordListResult>;
+ getLandlordDetails(id: string): Promise<LandlordDetailsDto>
+  toggleLandlordStatus(id: string, dto: ToggleUserStatusDto): Promise<LandlordStatusResult>;
+  approveLandlordKyc(landlordId: string): Promise<LandlordDetailsDto>
+  rejectLandlordKyc(landlordId: string, reason: string): Promise<LandlordDetailsDto>
+}

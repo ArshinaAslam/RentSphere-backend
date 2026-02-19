@@ -20,8 +20,8 @@ import logger from "../../../utils/logger";
 import { ILandlord } from "../../../models/landlordModel";
 import { ILandlordRepository } from "../../../repositories/interface/landlord/ILandlordRepository";
 import { changePasswordDto, editLandlordProfileDto } from "../../../dto/landlord/landlord.profile.dto";
-import { LandlordProfile } from "../../interface/landlord/ILandlordAuthService";
-import { ILandlordProfileService } from "../../interface/landlord/ILandlordProfileService";
+
+import { ILandlordProfileService, LandlordProfile } from "../../interface/landlord/ILandlordProfileService";
 
 
 

@@ -1,7 +1,8 @@
 
 import { Schema, model, Document } from "mongoose";
+import { UserRole } from "../types/auth.types";
 
-export type UserRole = "TENANT" | "LANDLORD" | "ADMIN";
+// export type UserRole = "TENANT" | "LANDLORD" | "ADMIN";
 
 export interface ITenant extends Document {
   firstName: string;

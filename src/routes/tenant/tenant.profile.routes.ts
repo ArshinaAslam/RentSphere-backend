@@ -16,9 +16,9 @@ const router = Router()
 const tenantProfileController = container.resolve(TenantProfileController)
 
 
-router.post('/tenant/change-password',authenticateToken,tenantOnly,asyncHandler(tenantProfileController.changeTenantPassword.bind(tenantProfileController)))
+router.post('/change-password',authenticateToken,tenantOnly,asyncHandler(tenantProfileController.changeTenantPassword.bind(tenantProfileController)))
 
-router.post('/tenant/editProfile', 
+router.post('/editProfile', 
     uploadImage.single('avatar'),  
   authenticateToken, tenantOnly,
   

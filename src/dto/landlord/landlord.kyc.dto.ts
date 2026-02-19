@@ -1,52 +1,5 @@
-import { UserRole } from "../../types/auth.types";
 
 
-
-
-export interface LandlordSignupDto  {
-    firstName : string ;
-    lastName : string ;
-    email : string ;
-    phone : string ,
-    password : string ;
-    role:UserRole
-}
-
-
-export interface verifyOtpDto {
-    otp :string ;
-    email:string ;
-}
-
-
-
-
-export interface resendOtpDto{
-    email:string;
-}
-
-export interface LandlordLoginDto{
-    email:string;
-    password:string;
-}
-
-
-
-
-export interface forgotPasswordDto{
-    email:string
-}
-
-export interface resetPasswordDto{
-    newPassword : string;
-    email : string;
-}
-
-
-export interface GoogleAuthDto {
-  token: string;
-  role: string; 
-}
 
 export type KycFiles = {
   aadhaarFront?: Express.Multer.File[];
@@ -92,11 +45,4 @@ export interface SubmitKycDto {
 export interface getKycStatusDto{
   email:string;
 }
-export interface editTenantProfileDto{
-    firstName:string;
-    lastName:string;
-    phone:string;
-    avatar?: string;
-}
-
 

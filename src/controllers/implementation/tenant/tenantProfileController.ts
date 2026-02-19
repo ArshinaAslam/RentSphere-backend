@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { DI_TYPES } from "../../../common/di/types";
 
-import { ITenantAuthController } from "../../interface/tenant/ITenantAuthController";
+
 import { injectable, inject } from "tsyringe";
 
 

@@ -15,8 +15,8 @@ import logger from "../../../utils/logger";
 import { ENV } from "../../../config/env";
 import { ITenant } from "../../../models/tenantModel";
 import { changePasswordDto, editTenantProfileDto } from "../../../dto/tenant/tenant.profile.dto";
-import { EditTenantProfileResult, UserProfile } from "../../interface/tenant/ITenantAuthService";
-import { ITenantProfileService } from "../../interface/tenant/ITenantProfileService";
+
+import { ITenantProfileService, UserProfile } from "../../interface/tenant/ITenantProfileService";
 
 
 

@@ -1,5 +1,6 @@
 import { Schema, model, Document } from "mongoose";
-import { UserRole } from "./tenantModel";
+import { UserRole } from "../types/auth.types";
+
 
 export interface ILandlord extends Document {
   firstName: string;

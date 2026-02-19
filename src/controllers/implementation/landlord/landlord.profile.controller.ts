@@ -10,7 +10,7 @@ import { AppError } from "../../../common/errors/appError";
 
 import logger from "../../../utils/logger";
 import { AuthRequest } from "../../../middleware/auth.middleware";
-import { ILandlordAuthService } from "../../../services/interface/landlord/ILandlordAuthService";
+
 import { uploadToS3 } from "../../../config/s3";
 
 import { changePasswordDto, editLandlordProfileDto } from "../../../dto/landlord/landlord.profile.dto";

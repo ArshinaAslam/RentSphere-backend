@@ -15,14 +15,14 @@ const   landlordProfileController = container.resolve(LandlordProfileController)
 
 
 
-router.post('/landlord/editProfile', 
+router.post('/editProfile', 
     uploadImage.single('avatar'),  
   authenticateToken, landlordOnly, 
   
   landlordProfileController.editLandlordProfile.bind(landlordProfileController)
 );
 
-router.post('/landlord/change-password',authenticateToken,landlordOnly,asyncHandler(landlordProfileController.changeLandlordPassword.bind(landlordProfileController)))
+router.post('/change-password',authenticateToken,landlordOnly,asyncHandler(landlordProfileController.changeLandlordPassword.bind(landlordProfileController)))
 
 
 

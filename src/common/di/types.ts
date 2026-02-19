@@ -1,5 +1,3 @@
-import { AdminAuthController } from "../../controllers/implementation/admin/admin.auth.controller";
-import { LandlordProfileController } from "../../controllers/implementation/landlord/landlord.profile.controller";
 
 
 export const DI_TYPES = {
@@ -12,17 +10,24 @@ export const DI_TYPES = {
 
      LandlordRepository : Symbol('LandlordRepository'),
      LandlordAuthService : Symbol('LandlordAuthService'),
+     LandlordKycService : Symbol('LandlordKycService'),
      LandlordProfileService : Symbol('LandlordProfileService'),
      LandlordAuthController : Symbol('LandlordAuthController'),
      LandlordProfileController : Symbol('LandlordProfileController'),
+     LandlordKycController : Symbol('LandlordKycController'),
 
      AdminRepository : Symbol('AdminRepository'),
      AdminAuthService : Symbol('AdminAuthService'),
+     AdminTenantService : Symbol('AdminTenantService'),
+     AdminLandlordService : Symbol('AdminLandlordService'),
      AdminAuthController: Symbol('AdminAuthController'),
+     AdminTenantController : Symbol('AdminTenantController'),
+     AdminLandlordController : Symbol('AdminLandlordController'),
     
      RedisService : Symbol('RedisService'),
      EmailService : Symbol('EmailService'),
-       
+     AuthService : Symbol('AuthService'),
+     UserRepoMap : Symbol('UserRepoMap')
    
    
 }as const

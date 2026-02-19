@@ -4,10 +4,10 @@ import cors from "cors";
 import { globalErrorHandler } from "./middleware/error.middleware";
 import cookieParser from "cookie-parser";
 import tenantRoutes from './routes/tenantRoutes';
-
 import landlordRoutes from './routes/landlordRoutes';
-
-import adminRoutes from './routes/adminRoutes'
+import adminRoutes from './routes/adminRoutes';
+import authRoutes from './routes/auth/auth.routes'
+import kycRoutes from './routes/auth/kyc.routes';
 
 
 
@@ -28,9 +28,12 @@ app.use(express.json());
  app.use("/api/admin",adminRoutes)
 app.use("/api/landlord",landlordRoutes)
  app.use("/api/tenant",tenantRoutes)
+ app.use("/api/auth",authRoutes)
+ app.use("/api/kyc",kycRoutes)
 
  app.use(globalErrorHandler)
 
 
 
 export default app;
+
