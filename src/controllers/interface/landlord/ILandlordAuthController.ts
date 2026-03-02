@@ -1,5 +1,4 @@
-
-// import { Request, Response } from 'express'; 
+// import { Request, Response } from 'express';
 // export interface ILandlordAuthController{
 //     landlordSignup(req: Request, res: Response): Promise<Response> ;
 //     googleAuth(req: Request, res: Response): Promise<Response>;

@@ -1,8 +1,10 @@
-import { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken";
+
 import { HttpStatus } from "../common/enums/httpStatus.enum";
-import jwt from 'jsonwebtoken';
-import { ENV } from "../config/env";
 import { AppError } from "../common/errors/appError";
+import { ENV } from "../config/env";
+
+import type { NextFunction, Request, Response } from "express";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -10,8 +12,6 @@ export interface AuthRequest extends Request {
     email: string;
     role: string;
   };
-
-  
 }
 
 export interface JwtPayload {
@@ -21,20 +21,20 @@ export interface JwtPayload {
 }
 
 export const authenticateToken = (
-  req: AuthRequest,  
+  req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
-  const accessToken = req.cookies?.accessToken;  
+  const { accessToken } = req.cookies as { accessToken: string | undefined };
 
-  console.log("authmiddleware url",req.url)
-  
   if (!accessToken) {
-   throw new AppError('Access denied. No token provided.', HttpStatus.UNAUTHORIZED)
+    throw new AppError(
+      "Access denied. No token provided.",
+      HttpStatus.UNAUTHORIZED,
+    );
   }
 
-  const decoded = jwt.verify(accessToken, ENV.JWT_ACCESS_SECRET!) as JwtPayload;
-  req.user = decoded; 
-  console.log("reached authmiddleware for approvekyc",req.user) 
+  const decoded = jwt.verify(accessToken, ENV.JWT_ACCESS_SECRET) as JwtPayload;
+  req.user = decoded;
   next();
 };

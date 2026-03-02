@@ -1,148 +1,137 @@
 import { Request, Response } from "express";
-import { DI_TYPES } from "../../../common/di/types";
-
 import { injectable, inject } from "tsyringe";
-import { GetLandlordDetailsDto, GetUsersDto, ToggleUserStatusDto } from "../../../dto/admin/admin.user.dto";
-import { HttpStatus } from "../../../common/enums/httpStatus.enum";
+
 import { MESSAGES } from "../../../common/constants/statusMessages";
-import { ApiResponses } from "../../../common/response/ApiResponse";
+import { DI_TYPES } from "../../../common/di/types";
+import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
-import logger from "../../../utils/logger";
+import { ApiResponses } from "../../../common/response/ApiResponse";
+import {
+  GetUsersDto,
+  ToggleUserStatusDto,
+} from "../../../dto/admin/admin.user.dto";
 import { IAdminLandlordService } from "../../../services/interface/admin/IAdminLandlordService";
+import logger from "../../../utils/logger";
 import { IAdminLandlordController } from "../../interface/admin/IAdminLandlordController";
 
 @injectable()
-export class AdminLandlordController implements IAdminLandlordController{ 
+export class AdminLandlordController implements IAdminLandlordController {
   constructor(
     @inject(DI_TYPES.AdminLandlordService)
     private readonly _adminLandlordService: IAdminLandlordService,
   ) {}
 
-  
-
-
   async getLandlords(req: Request, res: Response): Promise<Response> {
-    logger.info('Admin landlord list request', { query: req.query, ip: req.ip });
+    logger.info("Admin landlord list request", {
+      query: req.query,
+    });
 
-    const dto: GetUsersDto = {
-      search: req.query.search as string,
-      page: Number(req.query.page) || 1,
-      limit: Number(req.query.limit) || 10,
-    };
+    const dto: GetUsersDto = req.query;
 
-    const data = await this._adminLandlordService.getLandlords(dto);  
+    const data = await this._adminLandlordService.getLandlords(dto);
 
-    logger.info('Admin landlord list SUCCESS', { count: data.users.length, total: data.total });
-    return res.status(HttpStatus.OK).json(
-      new ApiResponses(true, MESSAGES.USERS.FETCH_SUCCESS, data)
-    );
+    logger.info("Admin landlord list SUCCESS", {
+      count: data.users.length,
+      total: data.total,
+    });
+    return res
+      .status(HttpStatus.OK)
+      .json(new ApiResponses(true, MESSAGES.USERS.FETCH_SUCCESS, data));
   }
 
+  async getLandlordDetails(req: Request, res: Response): Promise<Response> {
+    logger.info("Admin single landlord request", {
+      id: req.params.id,
+    });
 
+    const id = req.params.id;
+    if (!id) {
+      throw new AppError("Landlord id is required", HttpStatus.BAD_REQUEST);
+    }
 
- 
-async getLandlordDetails(req: Request, res: Response): Promise<Response> {
-  console.log("signlecontroller 1",req.params.id)
-  logger.info('Admin single landlord request', { 
-    id: req.params.id, 
-    ip: req.ip 
-  });
+    const landlord = await this._adminLandlordService.getLandlordDetails(id);
 
-  const dto: GetLandlordDetailsDto = {
-    id: req.params.id as string,
-  };
+    logger.info("Admin single landlord SUCCESS", {
+      id: id,
+      fullName: landlord.fullName,
+    });
 
-  const landlord = await this._adminLandlordService.getLandlordDetails(dto.id);
-
-  logger.info('Admin single landlord SUCCESS', { 
-    id: dto.id, 
-    fullName: landlord.fullName 
-  });
-    console.log("signlecontroller 2",landlord)
-  return res.status(HttpStatus.OK).json(
-    new ApiResponses(true, MESSAGES.USERS.FETCH_SUCCESS, landlord)
-  );
-}
-
+    return res
+      .status(HttpStatus.OK)
+      .json(new ApiResponses(true, MESSAGES.USERS.FETCH_SUCCESS, landlord));
+  }
 
   async toggleLandlordStatus(req: Request, res: Response): Promise<Response> {
-    console.log("WQEghnj mvvzkjx")
     const tenantId = req.params.id;
-     console.log("reached for toggle1",tenantId)
-   if (!tenantId) {
-    return res.status(HttpStatus.BAD_REQUEST).json(
-      new ApiResponses(false, "User ID is required", null)
-    );
-  }
-    logger.info('Admin toggle user status request', { 
+
+    if (!tenantId) {
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .json(new ApiResponses(false, "User ID is required", null));
+    }
+
+    const dto = req.body as ToggleUserStatusDto;
+
+    logger.info("Admin toggle user status request", {
       userId: req.params.id,
-      status: req.body.status,
-      ip: req.ip 
+      status: dto.status,
     });
-   
-    const dto: ToggleUserStatusDto = {
-      status: req.body.status,
-    };
-
-    const data = await this._adminLandlordService.toggleLandlordStatus(tenantId, dto);
-
-    logger.info('User status toggle SUCCESS', { 
-      userId: req.params.id,
-      status: data.status 
-    });
- console.log("data from toggleUserStatusc",data)
-    return res.status(HttpStatus.OK).json(
-      new ApiResponses(true, MESSAGES.USERS.STATUS_UPDATE_SUCCESS, data)
+    const data = await this._adminLandlordService.toggleLandlordStatus(
+      tenantId,
+      dto,
     );
+
+    logger.info("User status toggle SUCCESS", {
+      userId: req.params.id,
+      status: data.status,
+    });
+
+    return res
+      .status(HttpStatus.OK)
+      .json(new ApiResponses(true, MESSAGES.USERS.STATUS_UPDATE_SUCCESS, data));
   }
 
+  async approveLandlordKyc(req: Request, res: Response): Promise<void> {
+    if (typeof req.params.id !== "string") {
+      throw new AppError("Invalid landlord ID", HttpStatus.BAD_REQUEST);
+    }
+    const { id } = req.params;
 
+    logger.info("Admin approving KYC", { landlordId: id });
 
-  
-async approveLandlordKyc(req: Request, res: Response): Promise<void> {
-  console.log("hello from approve kyc")
-    if (typeof req.params.id !== 'string') {
-    throw new AppError('Invalid landlord ID', HttpStatus.BAD_REQUEST);
+    const landlord = await this._adminLandlordService.approveLandlordKyc(id);
+
+    logger.info("KYC approved successfully", {
+      landlordId: id,
+      fullName: landlord.fullName,
+    });
+
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: "KYC approved successfully",
+      data: landlord,
+    });
   }
-  const { id } = req.params;
-  console.log("approvekyccontroller1",id)
-  
-  logger.info('Admin approving KYC', { landlordId: id });
-  
-  const landlord = await this._adminLandlordService.approveLandlordKyc(id);
-  
-  logger.info('KYC approved successfully', { 
-    landlordId: id, 
-    fullName: landlord.fullName 
-  });
-  console.log("approvekyccontroller2",landlord)
-  res.status(HttpStatus.OK).json({
-    success: true,
-    message: 'KYC approved successfully',
-    data: landlord
-  });
-}
 
+  async rejectLandlordKyc(req: Request, res: Response): Promise<void> {
+    if (typeof req.params.id !== "string") {
+      throw new AppError("Invalid landlord ID", HttpStatus.BAD_REQUEST);
+    }
+    const { id } = req.params;
+    const { reason } = req.body as { reason: string };
 
-async rejectLandlordKyc(req: Request, res: Response): Promise<void> {
-  console.log("hello from reject kyc")
-   if (typeof req.params.id !== 'string') {
-    throw new AppError('Invalid landlord ID', HttpStatus.BAD_REQUEST);
+    logger.info("Admin rejecting KYC", { landlordId: id });
+
+    const landlord = await this._adminLandlordService.rejectLandlordKyc(
+      id,
+      reason,
+    );
+
+    logger.info("KYC rejected successfully", { landlordId: id });
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: "KYC rejected successfully",
+      data: landlord,
+    });
   }
-  const { id } = req.params;
-  const { reason } = req.body; 
-  
-  logger.info('Admin rejecting KYC', { landlordId: id });
-  
-  const landlord = await this._adminLandlordService.rejectLandlordKyc(id, reason);
-  
-  logger.info('KYC rejected successfully', { landlordId: id });
-  console.log("arejectkyccontroller2",landlord)
-  res.status(HttpStatus.OK).json({
-    success: true,
-    message: 'KYC rejected successfully',
-    data: landlord
-  });
-}
-
 }

@@ -1,12 +1,13 @@
-import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import { AdminModel } from "../models/adminModel";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
+
+import { AdminModel } from "../models/adminModel";
+import logger from "../utils/logger";
 
 dotenv.config();
 
 async function createAdmin() {
- 
   await mongoose.connect(process.env.MONGO_URI!);
 
   const email = "admin@gmail.com";
@@ -14,7 +15,7 @@ async function createAdmin() {
   const existingAdmin = await AdminModel.findOne({ email });
 
   if (existingAdmin) {
-    console.log("Admin already exists");
+    logger.info("Admin already exists");
     process.exit(0);
   }
 
@@ -25,8 +26,8 @@ async function createAdmin() {
     isActive: true,
   });
 
-  console.log("Admin created:", admin.email);
+  logger.info("Admin created successfully", { email: admin.email });
   process.exit(0);
 }
 
-createAdmin();
+void createAdmin();

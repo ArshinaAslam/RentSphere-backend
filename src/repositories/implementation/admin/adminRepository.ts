@@ -1,16 +1,8 @@
-import { injectable } from 'tsyringe';
-
-
-import { AdminModel, IAdmin } from '../../../models/adminModel'
-
-
-
+import { injectable } from "tsyringe";
 
 import { BaseRepository } from "../../../common/repository/BaseRepository";
-
-
-import { IAdminRepository } from '../../../repositories/interface/admin/IAdminReposiory';
-
+import { AdminModel, IAdmin } from "../../../models/adminModel";
+import { IAdminRepository } from "../../../repositories/interface/admin/IAdminReposiory";
 
 @injectable()
 export class AdminRepository
@@ -24,10 +16,4 @@ export class AdminRepository
   async findByEmail(email: string): Promise<IAdmin | null> {
     return this.findOne({ email });
   }
-
-
-  
-
-
- 
 }

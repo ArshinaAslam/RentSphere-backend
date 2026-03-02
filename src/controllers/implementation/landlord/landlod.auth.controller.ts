@@ -22,8 +22,6 @@
 //     private readonly _landlordAuthService: ILandlordAuthService,
 //   ) {}
 
-
-
 //   async landlordSignup(req: Request, res: Response): Promise<Response> {
 //     logger.info("Landlord signup START", { email: req.body.email, ip: req.ip });
 //     const dto: LandlordSignupDto = {
@@ -84,7 +82,6 @@
 //     });
 //   }
 
-
 //   async verifyLandlordOtp(req: Request, res: Response): Promise<Response> {
 //     logger.info("Landlord OTP verify START", {
 //       email: req.body.email,
@@ -117,8 +114,6 @@
 //       .status(HttpStatus.CREATED)
 //       .json({ success: true, message: "New OTP sent to your email" });
 //   }
-
-
 
 //   async landlordLogin(req: Request, res: Response): Promise<Response> {
 //     logger.info("Landlord login request", {
@@ -163,8 +158,6 @@
 //       redirectTo: "/landlord/dashboard",
 //     });
 //   }
-
-
 
 //   async landlordForgotPassword(req: Request, res: Response): Promise<Response> {
 //     logger.info("Landlord forgot password START", {
@@ -237,13 +230,6 @@
 //       .json(new ApiResponses(true, "Logged out successfully", {}));
 //   }
 
- 
-
- 
-
-
-
-
 //   async submitLandlordKyc(req: Request, res: Response): Promise<Response> {
 //     const email = req.body.email;
 //     if (!email) {
@@ -281,7 +267,7 @@
 //   }
 
 //   async getKycStatus(req: Request, res: Response): Promise<Response> {
-   
+
 //     logger.info("KYC status request", {
 //       ip: req.ip,
 //       email: req.query.email,
@@ -290,8 +276,6 @@
 //     const dto: getKycStatusDto = {
 //       email: req.query.email as string,
 //     };
-
-   
 
 //     if (!dto.email) {
 //       logger.warn("KYC status failed - email missing", { ip: req.ip });
@@ -307,7 +291,7 @@
 //       kycId: result.kycId,
 //       kycStatus: result.kycStatus,
 //     });
-   
+
 //     return res.status(HttpStatus.OK).json(
 //       new ApiResponses(true, "KYC status fetched successfully", {
 //         data: {

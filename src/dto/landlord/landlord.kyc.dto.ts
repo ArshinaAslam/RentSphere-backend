@@ -1,13 +1,9 @@
-
-
-
 export type KycFiles = {
   aadhaarFront?: Express.Multer.File[];
   aadhaarBack?: Express.Multer.File[];
   panCard?: Express.Multer.File[];
   selfie?: Express.Multer.File[];
 };
-
 
 export interface SubmitLandlordKycDto {
   email: string;
@@ -20,10 +16,6 @@ export interface SubmitLandlordKycDto {
     selfie: Express.Multer.File | null;
   };
 }
-
-
-
-
 
 export interface SubmitKycDto {
   email: string;
@@ -40,9 +32,6 @@ export interface SubmitKycDto {
   };
 }
 
-
-
-export interface getKycStatusDto{
-  email:string;
+export interface getKycStatusDto {
+  email: string;
 }
-

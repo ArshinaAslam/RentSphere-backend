@@ -1,21 +1,23 @@
 import { Request, Response } from "express";
-
 import { injectable, inject } from "tsyringe";
-import { DI_TYPES } from "../../../common/di/types";
 
-import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { MESSAGES } from "../../../common/constants/statusMessages";
-import { ApiResponses } from "../../../common/response/ApiResponse";
+import { DI_TYPES } from "../../../common/di/types";
+import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
-
-import logger from "../../../utils/logger";
-import { forgotPasswordDto, getKycStatusDto, KycFiles, LoginDto, resendOtpDto, resetPasswordDto, SignupDto, SubmitLandlordKycDto, verifyOtpDto } from "../../../dto/auth/auth.dto";
-import { IAuthController } from "../../interface/auth/IAuthController";
+import { ApiResponses } from "../../../common/response/ApiResponse";
+import {
+  forgotPasswordDto,
+  LoginDto,
+  resendOtpDto,
+  resetPasswordDto,
+  SignupDto,
+  verifyOtpDto,
+} from "../../../dto/auth/auth.dto";
 import { IAuthService } from "../../../services/interface/auth/IAuthService";
-
-
-
-
+import { UserRole } from "../../../types/auth.types";
+import logger from "../../../utils/logger";
+import { IAuthController } from "../../interface/auth/IAuthController";
 
 @injectable()
 export class AuthController implements IAuthController {
@@ -24,11 +26,10 @@ export class AuthController implements IAuthController {
     private readonly _authService: IAuthService,
   ) {}
 
-
-
   async signup(req: Request, res: Response): Promise<Response> {
-    logger.info("Signup START", { email: req.body.email });
-    const dto: SignupDto = req.body
+    const dto = req.body as SignupDto;
+
+    logger.info("Signup START", { email: dto.email });
 
     const data = await this._authService.signup(dto);
 
@@ -36,18 +37,16 @@ export class AuthController implements IAuthController {
     return res.status(HttpStatus.CREATED).json(
       new ApiResponses(true, MESSAGES.AUTH.SIGNUP_SUCCESS, {
         email: data.email,
-      
       }),
     );
   }
 
   async googleAuth(req: Request, res: Response): Promise<Response> {
+    const { token, role } = req.body as { token: string; role: UserRole };
+
     logger.info("Google OAuth request", {
-      role: req.body.role,
-      email: req.body.email || "unknown",
-      ip: req.ip,
+      role: role,
     });
-    const { token, role } = req.body;
 
     const result = await this._authService.googleAuth({ token, role });
 
@@ -79,16 +78,14 @@ export class AuthController implements IAuthController {
     });
   }
 
-
   async verifyOtp(req: Request, res: Response): Promise<Response> {
+    const dto = req.body as verifyOtpDto;
     logger.info("OTP verify START", {
-      email: req.body.email,
-     
+      email: dto.email,
     });
-    const dto: verifyOtpDto = req.body
 
     const kycData = await this._authService.verifyOtp(dto);
-    logger.info("OTP verified SUCCESS", { email: req.body.email });
+    logger.info("OTP verified SUCCESS", { email: dto.email });
     return res.status(HttpStatus.OK).json(
       new ApiResponses(true, MESSAGES.AUTH.EMAIL_VERIFIED, {
         kycData: kycData,
@@ -98,27 +95,21 @@ export class AuthController implements IAuthController {
   }
 
   async resendOtp(req: Request, res: Response): Promise<Response> {
-    logger.info("OTP resend request", { email: req.body.email, ip: req.ip });
-    const dto: resendOtpDto = req.body
+    const dto = req.body as resendOtpDto;
+    logger.info("OTP resend request", { email: dto.email });
 
     await this._authService.resendOtp(dto);
-    logger.info("OTP resend SUCCESS", { email: req.body.email });
+    logger.info("OTP resend SUCCESS", { email: dto.email });
     return res
       .status(HttpStatus.CREATED)
       .json({ success: true, message: "New OTP sent to your email" });
   }
 
-
-
   async login(req: Request, res: Response): Promise<Response> {
+    const dto = req.body as LoginDto;
     logger.info(" login request", {
-      email: req.body.email,
-     
+      email: dto.email,
     });
-
- 
-
-    const dto: LoginDto = req.body
 
     const result = await this._authService.login(dto);
 
@@ -141,67 +132,49 @@ export class AuthController implements IAuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-   
-
     return res.status(HttpStatus.OK).json({
       success: true,
       user: result.user,
       tokens: result.tokens,
-    //   redirectTo: "/landlord/dashboard",
     });
   }
 
-
-
   async forgotPassword(req: Request, res: Response): Promise<Response> {
-    logger.info(" forgot password START", {
-      email: req.body.email,
-     
-    });
+    const dto = req.body as forgotPasswordDto;
 
-    const dto: forgotPasswordDto = req.body
-    
+    logger.info(" forgot password START", {
+      email: dto.email,
+    });
 
     const result = await this._authService.forgotPassword(dto);
     logger.info("forgot password OTP sent", { email: result.email });
     return res.status(HttpStatus.OK).json(
       new ApiResponses(true, "Reset OTP sent to email", {
         email: result.email,
-        // redirectTo: "/landlord/forgot-verify-otp",
       }),
     );
   }
 
+  async resetPassword(req: Request, res: Response): Promise<Response> {
+    const dto = req.body as resetPasswordDto;
+    logger.info("Tenant password reset START", {
+      email: dto.email,
+    });
 
-    async resetPassword(req: Request, res: Response): Promise<Response> {
-      logger.info("Tenant password reset START", {
-        email: req.body.email,
-        ip: req.ip,
-      });
-      console.log("resetcontr1", req.body.email);
-      const dto: resetPasswordDto = req.body
-      
-  
-      const result = await this._authService.resetPassword(dto);
-      logger.info("Tenant password reset SUCCESS", { email: req.body.email });
-      console.log("resetcontro2", result);
-      return res
-        .status(HttpStatus.OK)
-        .json(
-          new ApiResponses(true, MESSAGES.AUTH.PASSWORD_RESET_SUCCESS, {
-            redirectTo: "/tenant/login",
-          }),
-        );
-    }
-  
+    await this._authService.resetPassword(dto);
+    logger.info("Tenant password reset SUCCESS", { email: dto.email });
 
-
+    return res.status(HttpStatus.OK).json(
+      new ApiResponses(true, MESSAGES.AUTH.PASSWORD_RESET_SUCCESS, {
+        redirectTo: "/tenant/login",
+      }),
+    );
+  }
 
   async refreshToken(req: Request, res: Response): Promise<Response> {
     logger.info("Token refresh request");
-    console.log("refresh cpmtroller1", req.cookies.refreshToken);
-    const refreshToken = req.cookies.refreshToken;
-    console.log("refreshToken", refreshToken);
+
+    const { refreshToken } = req.cookies as { refreshToken: string };
     if (!refreshToken) {
       throw new AppError("Refresh token required", HttpStatus.UNAUTHORIZED);
     }
@@ -214,19 +187,16 @@ export class AuthController implements IAuthController {
       sameSite: "strict",
       maxAge: 15 * 60 * 1000,
     });
-    console.log("refresh cpmtroller2");
+
     logger.info("Token refresh SUCCESS");
     return res
       .status(HttpStatus.OK)
       .json(new ApiResponses(true, "Token refreshed", { success: true }));
   }
 
-
-
+  // eslint-disable-next-line @typescript-eslint/require-await
   async logout(req: Request, res: Response): Promise<Response> {
-    logger.info("Logout request", {
-      ip: req.ip,
-    });
+    logger.info("Logout request", {});
     res.clearCookie("accessToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -249,13 +219,4 @@ export class AuthController implements IAuthController {
       .status(HttpStatus.OK)
       .json(new ApiResponses(true, "Logged out successfully", {}));
   }
-
- 
-
- 
-
-
-
-
- 
 }

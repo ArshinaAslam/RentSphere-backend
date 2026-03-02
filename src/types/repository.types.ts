@@ -1,9 +1,8 @@
-import { ITenantRepository } from "../repositories/interface/tenant/ITenantRepository";
-import { ILandlordRepository } from "../repositories/interface/landlord/ILandlordRepository";
-import { IAdminRepository } from "../repositories/interface/admin/IAdminReposiory";
+import type { ILandlordRepository } from "../repositories/interface/landlord/ILandlordRepository";
+import type { ITenantRepository } from "../repositories/interface/tenant/ITenantRepository";
 
 export type IUserRepoMap = {
   TENANT: ITenantRepository;
   LANDLORD: ILandlordRepository;
-//   ADMIN: IAdminRepository;
+  //   ADMIN: IAdminRepository;
 };

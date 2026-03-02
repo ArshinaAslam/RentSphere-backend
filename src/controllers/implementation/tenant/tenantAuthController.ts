@@ -4,7 +4,6 @@
 // import { ITenantAuthController } from "../../interface/tenant/ITenantAuthController";
 // import { injectable, inject } from "tsyringe";
 
-
 // import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 // import { MESSAGES } from "../../../common/constants/statusMessages";
 // import { ApiResponses } from "../../../common/response/ApiResponse";
@@ -50,7 +49,6 @@
 //     );
 //   }
 
- 
 //   async googleAuth(req: Request, res: Response): Promise<Response> {
 //     logger.info("Google OAuth request", {
 //       role: req.body.role,
@@ -84,7 +82,7 @@
 //     return res.status(HttpStatus.OK).json({
 //       success: true,
 //       user: result.user,
-//       redirectTo: "/tenant/dashboard" 
+//       redirectTo: "/tenant/dashboard"
 //     });
 //   }
 
@@ -104,8 +102,6 @@
 //       // redirectTo: "/tenant/login",
 //     });
 //   }
-
-
 
 //   async resendTenantOtp(req: Request, res: Response): Promise<Response> {
 //     logger.info("OTP resend request", { email: req.body.email, ip: req.ip });
@@ -161,8 +157,6 @@
 //     });
 //   }
 
-
-
 //   async tenantForgotPassword(req: Request, res: Response): Promise<Response> {
 //     logger.info("Forgot password START", { email: req.body.email, ip: req.ip });
 
@@ -205,8 +199,6 @@
 //         }),
 //       );
 //   }
-
-  
 
 //   async refreshTenantToken(req: Request, res: Response): Promise<Response> {
 //     logger.info("Token refresh request");
@@ -258,10 +250,5 @@
 //       .status(HttpStatus.OK)
 //       .json(new ApiResponses(true, "Logged out successfully", {}));
 //   }
-
-     
-
- 
-
 
 // }
