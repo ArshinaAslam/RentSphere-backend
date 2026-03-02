@@ -1,7 +1,9 @@
+import { Schema, model } from "mongoose";
 
-import { Schema, model, Document } from "mongoose";
+import type { UserRole } from "../types/auth.types";
+import type { Document } from "mongoose";
 
-export type UserRole = "TENANT" | "LANDLORD" | "ADMIN";
+// export type UserRole = "TENANT" | "LANDLORD" | "ADMIN";
 
 export interface ITenant extends Document {
   firstName: string;
@@ -10,11 +12,11 @@ export interface ITenant extends Document {
   phone: string;
   passwordHash: string;
   role: UserRole;
-  isEmailVerified:boolean;
-  isActive:boolean;
-   googleId?: string;   
-   avatar?: string;
-   kycStatus?: "NOT_SUBMITTED" | "PENDING" | "APPROVED" | "REJECTED"; 
+  isEmailVerified: boolean;
+  isActive: boolean;
+  googleId?: string;
+  avatar?: string;
+  kycStatus?: "NOT_SUBMITTED" | "PENDING" | "APPROVED" | "REJECTED";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,18 +28,22 @@ const TenantSchema = new Schema<ITenant>(
     email: { type: String, required: true, unique: true, lowercase: true },
     phone: { type: String },
     passwordHash: { type: String },
-    role: { type: String, enum: ["TENANT", "LANDLORD", "ADMIN"], required: true },
-    isEmailVerified : {type:Boolean,default:false},
-    isActive : {type:Boolean,default:false},
-     kycStatus: { 
-      type: String, 
-      enum: ["NOT_SUBMITTED", "PENDING", "APPROVED", "REJECTED"], 
-      default: "NOT_SUBMITTED" 
+    role: {
+      type: String,
+      enum: ["TENANT", "LANDLORD", "ADMIN"],
+      required: true,
     },
-     googleId : {type:String},
-     avatar : {type:String}
+    isEmailVerified: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: false },
+    kycStatus: {
+      type: String,
+      enum: ["NOT_SUBMITTED", "PENDING", "APPROVED", "REJECTED"],
+      default: "NOT_SUBMITTED",
+    },
+    googleId: { type: String },
+    avatar: { type: String },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const TenantModel = model<ITenant>("User", TenantSchema);

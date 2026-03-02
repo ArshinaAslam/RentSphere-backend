@@ -1,17 +1,18 @@
-import { injectable } from "tsyringe";
 import nodemailer from "nodemailer";
+import { injectable } from "tsyringe";
+
 import { ENV } from "../../config/env";
 import { IEmailService } from "../interface/IEmailService";
 
 @injectable()
 export class EmailService implements IEmailService {
   private transporter = nodemailer.createTransport({
-    host: ENV.SMTP_HOST,      
+    host: ENV.SMTP_HOST,
     port: 587,
     secure: false,
     auth: {
-      user: ENV.SMTP_USER,    
-      pass: ENV.SMTP_PASS,    
+      user: ENV.SMTP_USER,
+      pass: ENV.SMTP_PASS,
     },
   });
 

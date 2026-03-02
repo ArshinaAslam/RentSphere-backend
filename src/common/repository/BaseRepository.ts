@@ -1,9 +1,7 @@
-import type { Document,Model, FilterQuery } from "mongoose";
-import { IBaseRepository } from "./IBaseRepository";
+import type { IBaseRepository } from "./IBaseRepository";
+import type { Document, Model, FilterQuery } from "mongoose";
 
-export class BaseRepository<T extends Document>
-  implements IBaseRepository<T>
-{
+export class BaseRepository<T extends Document> implements IBaseRepository<T> {
   protected readonly model: Model<T>;
 
   constructor(model: Model<T>) {
@@ -28,18 +26,14 @@ export class BaseRepository<T extends Document>
   }
 
   async update(id: string, data: Partial<T>): Promise<T | null> {
-    return this.model
-      .findByIdAndUpdate(id, data, { new: true })
-      .exec();
+    return this.model.findByIdAndUpdate(id, data, { new: true }).exec();
   }
 
   async delete(id: string): Promise<void> {
     await this.model.findByIdAndDelete(id).exec();
   }
 
-    async count(filter: FilterQuery<T>): Promise<number> {
+  async count(filter: FilterQuery<T>): Promise<number> {
     return this.model.countDocuments(filter).exec();
   }
-
-  
 }

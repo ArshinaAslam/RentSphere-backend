@@ -1,50 +1,40 @@
-import { UserRole } from "../../models/tenantModel";
+import type { UserRole } from "../../types/auth.types";
 
-
-
-export interface LandlordSignupDto  {
-    firstName : string ;
-    lastName : string ;
-    email : string ;
-    phone : string ,
-    password : string ;
-    role:UserRole
+export interface LandlordSignupDto {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+  role: UserRole;
 }
-
 
 export interface verifyOtpDto {
-    otp :string ;
-    email:string ;
+  otp: string;
+  email: string;
 }
 
-
-
-
-export interface resendOtpDto{
-    email:string;
+export interface resendOtpDto {
+  email: string;
 }
 
-export interface LandlordLoginDto{
-    email:string;
-    password:string;
+export interface LandlordLoginDto {
+  email: string;
+  password: string;
 }
 
-
-
-
-export interface forgotPasswordDto{
-    email:string
+export interface forgotPasswordDto {
+  email: string;
 }
 
-export interface resetPasswordDto{
-    newPassword : string;
-    email : string;
+export interface resetPasswordDto {
+  newPassword: string;
+  email: string;
 }
-
 
 export interface GoogleAuthDto {
   token: string;
-  role: string; 
+  role: string;
 }
 
 export type KycFiles = {
@@ -53,7 +43,6 @@ export type KycFiles = {
   panCard?: Express.Multer.File[];
   selfie?: Express.Multer.File[];
 };
-
 
 export interface SubmitLandlordKycDto {
   email: string;
@@ -66,10 +55,6 @@ export interface SubmitLandlordKycDto {
     selfie: Express.Multer.File | null;
   };
 }
-
-
-
-
 
 export interface SubmitKycDto {
   email: string;
@@ -86,16 +71,12 @@ export interface SubmitKycDto {
   };
 }
 
-
-
-export interface getKycStatusDto{
-  email:string;
+export interface getKycStatusDto {
+  email: string;
 }
-export interface editTenantProfileDto{
-    firstName:string;
-    lastName:string;
-    phone:string;
-    avatar?: string;
+export interface editTenantProfileDto {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  avatar?: string;
 }
-
-

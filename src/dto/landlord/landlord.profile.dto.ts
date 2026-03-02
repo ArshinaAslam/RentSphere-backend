@@ -1,11 +1,11 @@
-export interface editLandlordProfileDto{
-    firstName:string;
-    lastName:string;
-    phone:string;
-    avatar?: string;
+export interface editLandlordProfileDto {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  avatar?: string;
 }
-export interface changePasswordDto{
-    currentPassword : string;
-    newPassword : string;
-    confirmPassword: string;
+export interface changePasswordDto {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
 }

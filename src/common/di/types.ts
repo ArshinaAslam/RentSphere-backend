@@ -1,28 +1,36 @@
-import { AdminAuthController } from "../../controllers/implementation/admin/admin.auth.controller";
-import { LandlordProfileController } from "../../controllers/implementation/landlord/landlord.profile.controller";
-
-
 export const DI_TYPES = {
-    TenantRepository : Symbol('TenantRepository'),
-     TenantAuthService : Symbol('TenantAuthService'),
-    TenantProfileService:Symbol('TenantProfileService'),
-     TenantAuthController : Symbol('TenantAuthController'),
-    TenantProfileController :Symbol('TenantProfileController'),
+  TenantRepository: Symbol("TenantRepository"),
+  TenantAuthService: Symbol("TenantAuthService"),
+  TenantProfileService: Symbol("TenantProfileService"),
+  TenantAuthController: Symbol("TenantAuthController"),
+  TenantProfileController: Symbol("TenantProfileController"),
+  TenantPropertyService: Symbol("TenantPropertyService"),
+  TenantPropertyController: Symbol("TenantPropertyController"),
+  VisitBookingRepository: Symbol("VisitBookingRepository"),
+  VisitBookingService: Symbol("VisitBookingService"),
+  TenantVisitController: Symbol("TenantVisitController"),
 
+  LandlordRepository: Symbol("LandlordRepository"),
+  LandlordAuthService: Symbol("LandlordAuthService"),
+  LandlordKycService: Symbol("LandlordKycService"),
+  LandlordProfileService: Symbol("LandlordProfileService"),
+  LandlordAuthController: Symbol("LandlordAuthController"),
+  LandlordProfileController: Symbol("LandlordProfileController"),
+  LandlordKycController: Symbol("LandlordKycController"),
+  PropertyRepository: Symbol("PropertyRepository"),
+  LandlordPropertyService: Symbol("LandlordPropertyService"),
+  LandlordPropertyController: Symbol("LandlordPropertyController"),
 
-     LandlordRepository : Symbol('LandlordRepository'),
-     LandlordAuthService : Symbol('LandlordAuthService'),
-     LandlordProfileService : Symbol('LandlordProfileService'),
-     LandlordAuthController : Symbol('LandlordAuthController'),
-     LandlordProfileController : Symbol('LandlordProfileController'),
+  AdminRepository: Symbol("AdminRepository"),
+  AdminAuthService: Symbol("AdminAuthService"),
+  AdminTenantService: Symbol("AdminTenantService"),
+  AdminLandlordService: Symbol("AdminLandlordService"),
+  AdminAuthController: Symbol("AdminAuthController"),
+  AdminTenantController: Symbol("AdminTenantController"),
+  AdminLandlordController: Symbol("AdminLandlordController"),
 
-     AdminRepository : Symbol('AdminRepository'),
-     AdminAuthService : Symbol('AdminAuthService'),
-     AdminAuthController: Symbol('AdminAuthController'),
-    
-     RedisService : Symbol('RedisService'),
-     EmailService : Symbol('EmailService'),
-       
-   
-   
-}as const
+  RedisService: Symbol("RedisService"),
+  EmailService: Symbol("EmailService"),
+  AuthService: Symbol("AuthService"),
+  UserRepoMap: Symbol("UserRepoMap"),
+} as const;

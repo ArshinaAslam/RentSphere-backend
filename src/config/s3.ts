@@ -2,9 +2,6 @@
 // import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 // import { v4 as uuidv4 } from 'uuid';
 
-
-
-
 // const s3Client = new S3Client({
 //   region: process.env.AWS_REGION!,
 //   credentials: {
@@ -13,31 +10,27 @@
 //   },
 // });
 
-
-
 // export const uploadToS3 = async (
-//   file: Express.Multer.File, 
-//   prefix: string = 'avatars',  
+//   file: Express.Multer.File,
+//   prefix: string = 'avatars',
 //   userId: string
 // ): Promise<string> => {
 //   const fileName = `${prefix}/${userId}/${uuidv4()}-${file.originalname}`;
-  
+
 //   const params: PutObjectCommand['input'] = {
 //     Bucket: process.env.AWS_S3_BUCKET!,
 //     Key: fileName,
 //     Body: file.buffer,
 //     ContentType: file.mimetype,
-//     ACL: 'public-read',  
-//     Metadata: {  
+//     ACL: 'public-read',
+//     Metadata: {
 //       'uploaded-by': 'rentsphere-service',
 //       'file-type': file.mimetype,
 //       'user-id': userId,
 //     },
 //   };
 
-
 //   const result = await s3Client.send(new PutObjectCommand(params));
-
 
 //    const fileUrl = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
 
@@ -50,17 +43,20 @@
 //     Bucket: process.env.AWS_S3_BUCKET!,
 //     Key: key,
 //   };
-  
+
 //   await s3Client.send(new DeleteObjectCommand(params));
 //   console.log(`Deleted: ${key}`);
 // };
 
-
 // backend/src/config/s3.ts
-import { ENV } from '../config/env';
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} from "@aws-sdk/client-s3";
+import { v4 as uuidv4 } from "uuid";
 
+import { ENV } from "../config/env";
 
 let _s3Client: S3Client | null = null;
 
@@ -82,9 +78,9 @@ const getS3Client = () => {
 };
 
 export const uploadToS3 = async (
-  file: Express.Multer.File, 
-  prefix: string = 'avatars',  
-  userId: string
+  file: Express.Multer.File,
+  prefix: string = "avatars",
+  userId: string,
 ): Promise<string> => {
   const fileName = `${prefix}/${userId}/${uuidv4()}-${file.originalname}`;
   const client = getS3Client();
@@ -98,11 +94,8 @@ export const uploadToS3 = async (
 
   await client.send(new PutObjectCommand(params));
 
-  
-  
   const fileUrl = `https://${ENV.AWS_S3_BUCKET}.s3.${ENV.AWS_REGION}.amazonaws.com/${fileName}`;
 
-  console.log(`S3 Upload Success: ${fileUrl}`);
   return fileUrl;
 };
 
@@ -112,6 +105,6 @@ export const deleteFromS3 = async (key: string): Promise<void> => {
     Bucket: ENV.AWS_S3_BUCKET,
     Key: key,
   };
-  
+
   await client.send(new DeleteObjectCommand(params));
 };

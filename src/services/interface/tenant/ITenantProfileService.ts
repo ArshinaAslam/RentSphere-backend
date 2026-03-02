@@ -1,31 +1,18 @@
-import { changePasswordDto, editTenantProfileDto } from "../../../dto/tenant/tenant.profile.dto";
-
-
-
-
-
-
-export interface UserProfile{
-  id: string ; 
-  email: string ;
-   role: string ;
-   fullName:string;
-   avatar?:string,
-   phone:string
-}
-
-
-
-
-
-
-
-
-
+import type {
+  changePasswordDto,
+  editTenantProfileDto,
+  UserProfileDto,
+} from "../../../dto/tenant/tenant.profile.dto";
 
 export interface ITenantProfileService {
-  
- editTenantProfile(dto:editTenantProfileDto,userId: string):Promise<{ user:UserProfile }>
-  
-  changeTenantPassword(dto: changePasswordDto, userId: string): Promise<{ user: UserProfile }>
-  }
+  editTenantProfile(
+    dto: editTenantProfileDto,
+    userId: string,
+    file?: Express.Multer.File,
+  ): Promise<{ user: UserProfileDto }>;
+
+  changeTenantPassword(
+    dto: changePasswordDto,
+    userId: string,
+  ): Promise<{ user: UserProfileDto }>;
+}

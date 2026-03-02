@@ -1,29 +1,33 @@
-
-import Router from 'express';
+import Router from "express";
 import { container } from "tsyringe";
-import { asyncHandler } from '../../middleware/asyncHandler';
 
+import { uploadImage } from "../../config/multer";
+import { LandlordProfileController } from "../../controllers/implementation/landlord/landlord.profile.controller";
+import { asyncHandler } from "../../middleware/asyncHandler";
+import { authenticateToken } from "../../middleware/auth.middleware";
+import { landlordOnly } from "../../middleware/role.middleware";
+const router = Router();
 
+const landlordProfileController = container.resolve(LandlordProfileController);
 
-import {  uploadImage, } from '../../config/multer';
-import { authenticateToken } from '../../middleware/auth.middleware';
-import { landlordOnly } from '../../middleware/role.middleware';
-import { LandlordProfileController } from '../../controllers/implementation/landlord/landlord.profile.controller';
-const router = Router()
+router.post(
+  "/editProfile",
+  uploadImage.single("avatar"),
+  authenticateToken,
+  landlordOnly,
 
-const   landlordProfileController = container.resolve(LandlordProfileController)
-
-
-
-router.post('/landlord/editProfile', 
-    uploadImage.single('avatar'),  
-  authenticateToken, landlordOnly, 
-  
-  landlordProfileController.editLandlordProfile.bind(landlordProfileController)
+  landlordProfileController.editLandlordProfile.bind(landlordProfileController),
 );
 
-router.post('/landlord/change-password',authenticateToken,landlordOnly,asyncHandler(landlordProfileController.changeLandlordPassword.bind(landlordProfileController)))
-
-
+router.post(
+  "/change-password",
+  authenticateToken,
+  landlordOnly,
+  asyncHandler(
+    landlordProfileController.changeLandlordPassword.bind(
+      landlordProfileController,
+    ),
+  ),
+);
 
 export default router;
