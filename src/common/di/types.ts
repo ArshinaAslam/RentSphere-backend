@@ -20,6 +20,8 @@ export const DI_TYPES = {
   PropertyRepository: Symbol("PropertyRepository"),
   LandlordPropertyService: Symbol("LandlordPropertyService"),
   LandlordPropertyController: Symbol("LandlordPropertyController"),
+  LandlordVisitService: Symbol("LandlordVisitService"),
+  LandlordVisitController: Symbol("LandlordVisitController"),
 
   AdminRepository: Symbol("AdminRepository"),
   AdminAuthService: Symbol("AdminAuthService"),

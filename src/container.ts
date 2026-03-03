@@ -27,6 +27,8 @@ import { RedisService } from "./services/implemenation/redisService";
 import { tenantProfileService } from "./services/implemenation/tenant/tenant.profile.service";
 import { TenantPropertyService } from "./services/implemenation/tenant/tenant.property.service";
 import { TenantVisitService } from "./services/implemenation/tenant/tenant.visit.service";
+import { LandlordVisitController } from "./controllers/implementation/landlord/landlord.visit.controller";
+import { LandlordVisitService } from "./services/implemenation/landlord/landlord.visit.service";
 
 // ===== Bind Repositories =====
 container.registerSingleton(DI_TYPES.TenantRepository, TenantRepository);
@@ -69,6 +71,11 @@ container.registerSingleton(
   DI_TYPES.LandlordPropertyService,
   LandlordPropertyService,
 );
+container.registerSingleton(
+  DI_TYPES.LandlordVisitService,
+  LandlordVisitService,
+);
+
 
 container.registerSingleton(DI_TYPES.AdminAuthService, AdminAuthService);
 container.registerSingleton(DI_TYPES.AdminTenantService, AdminTenantService);
@@ -106,6 +113,10 @@ container.registerSingleton(
 container.registerSingleton(
   DI_TYPES.LandlordPropertyController,
   LandlordPropertyController,
+);
+container.registerSingleton(
+  DI_TYPES.LandlordVisitController,
+  LandlordVisitController,
 );
 container.registerSingleton(DI_TYPES.AdminAuthController, AdminAuthController);
 container.registerSingleton(

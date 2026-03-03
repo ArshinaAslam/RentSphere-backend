@@ -8,6 +8,7 @@ import { VisitBookingRepository } from "../../../repositories/implementation/vis
 import logger from "../../../utils/logger";
 
 import type { IVisitBooking } from "../../../models/visitBookingModel";
+import { VisitBookingMapper, VisitBookingResponseDto } from "../../../mappers/visitBooking.mapper";
 
 @injectable()
 export class TenantVisitService {
@@ -52,16 +53,11 @@ export class TenantVisitService {
       );
     }
 
-    const tenantBookings = await this._visitRepo.findByTenantId(tenantId);
-
-    const duplicate = tenantBookings.map((b) => {
-      return (
-        String(b.propertyId) === propertyId &&
-        b.date === date &&
-        b.status !== "cancelled"
-      );
-    });
-
+    const duplicate = await this._visitRepo.findTenantBookingForProperty(
+  tenantId,
+  propertyId,
+  date,
+);
     if (duplicate) {
       throw new AppError(
         "You already have a visit booked for this property on this date.",
@@ -69,13 +65,14 @@ export class TenantVisitService {
       );
     }
 
-    await this._visitRepo.create({
-      propertyId,
-      tenantId,
-      landlordId,
-      date,
-      timeSlot,
-    });
+    await this._visitRepo.createSlot({
+  propertyId,
+  tenantId,
+  landlordId,
+  date,
+  timeSlot,
+  status: "confirmed",
+});
 
     logger.info("Visit booked successfully", {
       tenantId,
@@ -85,15 +82,17 @@ export class TenantVisitService {
     });
   }
 
-  async getTenantVisits(tenantId: string): Promise<IVisitBooking[]> {
+  async getTenantVisits(tenantId: string): Promise<VisitBookingResponseDto[]> {
     logger.info("Fetching visits for tenant", { tenantId });
 
     const visits = await this._visitRepo.findByTenantId(tenantId);
-    console.log("visits");
+    
 
     logger.info("Visits fetched", { tenantId, count: visits.length });
 
-    return visits;
+    const mappedVisits = VisitBookingMapper.toResponseDtoList(visits);
+   
+       return mappedVisits;
   }
 
   async cancelVisit(tenantId: string, visitId: string): Promise<void> {
@@ -105,7 +104,7 @@ export class TenantVisitService {
       throw new AppError("Visit not found", HttpStatus.NOT_FOUND);
     }
 
-    // Make sure tenant owns this booking
+   
     if (String(visit.tenantId) !== tenantId) {
       throw new AppError(
         "Unauthorized: This is not your booking",

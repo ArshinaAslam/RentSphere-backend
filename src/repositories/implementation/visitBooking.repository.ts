@@ -42,6 +42,11 @@ export class VisitBookingRepository
     } as FilterQuery<IVisitBooking>);
   }
 
+
+  async createSlot(data: Partial<IVisitBooking>): Promise<IVisitBooking> {
+    return this.model.create(data);
+}
+
   async findByTenantId(tenantId: string): Promise<IVisitBooking[]> {
     return (
       this.model
@@ -51,6 +56,20 @@ export class VisitBookingRepository
         .exec()
     );
   }
+
+
+  async findTenantBookingForProperty(
+  tenantId:   string,
+  propertyId: string,
+  date:       string,
+): Promise<IVisitBooking | null> {
+  return this.findOne({
+    tenantId,
+    propertyId,
+    date,
+    status: { $ne: 'cancelled' },
+  } as FilterQuery<IVisitBooking>);
+}
 
   async findByLandlordId(landlordId: string): Promise<IVisitBooking[]> {
     return this.model

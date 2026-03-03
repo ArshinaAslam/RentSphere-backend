@@ -23,7 +23,7 @@ const VisitBookingSchema: Schema = new Schema(
     },
     tenantId: {
       type: Schema.Types.ObjectId,
-      ref: "Tenant",
+      ref: "User",
       required: true,
       index: true,
     },
@@ -52,9 +52,15 @@ const VisitBookingSchema: Schema = new Schema(
   },
 );
 
+
 VisitBookingSchema.index(
   { propertyId: 1, date: 1, timeSlot: 1 },
-  { unique: true },
+  {
+    unique: true,
+    partialFilterExpression: {
+      status: { $in: ["pending", "confirmed"] },
+    },
+  },
 );
 
 VisitBookingSchema.index({ tenantId: 1, status: 1 });
