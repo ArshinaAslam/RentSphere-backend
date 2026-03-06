@@ -18,6 +18,7 @@ import { IAuthService } from "../../../services/interface/auth/IAuthService";
 import { UserRole } from "../../../types/auth.types";
 import logger from "../../../utils/logger";
 import { IAuthController } from "../../interface/auth/IAuthController";
+import { ENV } from "../../../config/env";
 
 @injectable()
 export class AuthController implements IAuthController {
@@ -54,14 +55,14 @@ export class AuthController implements IAuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000,
+      maxAge: ENV.ACCESS_TOKEN_MAX_AGE,
     });
 
     res.cookie("refreshToken", result.tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: ENV.REFRESH_TOKEN_MAX_AGE,
     });
 
     logger.info("Google auth SUCCESS - cookies set", {
@@ -122,14 +123,14 @@ export class AuthController implements IAuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000,
+      maxAge: ENV.ACCESS_TOKEN_MAX_AGE,
     });
 
     res.cookie("refreshToken", result.tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge:  ENV.REFRESH_TOKEN_MAX_AGE,
     });
 
     return res.status(HttpStatus.OK).json({
@@ -185,7 +186,7 @@ export class AuthController implements IAuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000,
+      maxAge: ENV.ACCESS_TOKEN_MAX_AGE,
     });
 
     logger.info("Token refresh SUCCESS");
