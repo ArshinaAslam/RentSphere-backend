@@ -16,7 +16,7 @@ export class TenantPropertyController {
   ) {}
 
   async getAllProperties(req: Request, res: Response): Promise<Response> {
-    logger.info("Tenant fetch all properties request", { ip: req.ip });
+    logger.info("Tenant fetch all properties request");
 
     const dto: GetAllPropertiesDto = req.query;
 

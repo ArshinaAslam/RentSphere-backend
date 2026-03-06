@@ -9,6 +9,8 @@ export const DI_TYPES = {
   VisitBookingRepository: Symbol("VisitBookingRepository"),
   VisitBookingService: Symbol("VisitBookingService"),
   TenantVisitController: Symbol("TenantVisitController"),
+  InquiryRepository: Symbol("InquiryRepository"),
+  TenantInquiryService: Symbol("TenantInquiryService"),
 
   LandlordRepository: Symbol("LandlordRepository"),
   LandlordAuthService: Symbol("LandlordAuthService"),
@@ -22,6 +24,7 @@ export const DI_TYPES = {
   LandlordPropertyController: Symbol("LandlordPropertyController"),
   LandlordVisitService: Symbol("LandlordVisitService"),
   LandlordVisitController: Symbol("LandlordVisitController"),
+  LandlordInquiryService: Symbol("LandlordInquiryService"),
 
   AdminRepository: Symbol("AdminRepository"),
   AdminAuthService: Symbol("AdminAuthService"),

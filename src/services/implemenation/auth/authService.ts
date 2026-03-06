@@ -284,7 +284,7 @@ export class AuthService implements IAuthService {
 
     if (!user.isActive) {
       logger.warn("Login failed - inactive user", { email: dto.email });
-      throw new AppError("Email is inactive", HttpStatus.UNAUTHORIZED);
+      throw new AppError("Email is blocked by Admin", HttpStatus.UNAUTHORIZED);
     }
 
     const isValidPassword = await bcrypt.compare(
