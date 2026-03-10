@@ -7,7 +7,7 @@ import { authenticateToken } from "../../middleware/auth.middleware";
 import { landlordOnly } from "../../middleware/role.middleware";
 
 const router = Router();
-const visitController   = container.resolve(LandlordVisitController);
+const visitController = container.resolve(LandlordVisitController);
 
 router.get(
   "/visit-requests",

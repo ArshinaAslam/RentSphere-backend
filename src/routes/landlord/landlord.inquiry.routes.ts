@@ -7,7 +7,7 @@ import { authenticateToken } from "../../middleware/auth.middleware";
 import { landlordOnly } from "../../middleware/role.middleware";
 
 const router = Router();
-const inquiryController   = container.resolve(LandlordInquiryController);
+const inquiryController = container.resolve(LandlordInquiryController);
 
 router.get(
   "/all-inquiries",
@@ -15,7 +15,5 @@ router.get(
   landlordOnly,
   asyncHandler(inquiryController.getLandlordInquiries.bind(inquiryController)),
 );
-
-
 
 export default router;

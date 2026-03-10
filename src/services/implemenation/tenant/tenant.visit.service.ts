@@ -4,11 +4,14 @@ import { DI_TYPES } from "../../../common/di/types";
 import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
 import { BookVisitDto } from "../../../dto/tenant/tenant.visit.dto";
+import {
+  VisitBookingMapper,
+  VisitBookingResponseDto,
+} from "../../../mappers/visitBooking.mapper";
 import { VisitBookingRepository } from "../../../repositories/implementation/visitBooking.repository";
 import logger from "../../../utils/logger";
 
 import type { IVisitBooking } from "../../../models/visitBookingModel";
-import { VisitBookingMapper, VisitBookingResponseDto } from "../../../mappers/visitBooking.mapper";
 
 @injectable()
 export class TenantVisitService {
@@ -54,10 +57,10 @@ export class TenantVisitService {
     }
 
     const duplicate = await this._visitRepo.findTenantBookingForProperty(
-  tenantId,
-  propertyId,
-  date,
-);
+      tenantId,
+      propertyId,
+      date,
+    );
     if (duplicate) {
       throw new AppError(
         "You already have a visit booked for this property on this date.",
@@ -66,13 +69,13 @@ export class TenantVisitService {
     }
 
     await this._visitRepo.createSlot({
-  propertyId,
-  tenantId,
-  landlordId,
-  date,
-  timeSlot,
-  status: "confirmed",
-});
+      propertyId,
+      tenantId,
+      landlordId,
+      date,
+      timeSlot,
+      status: "confirmed",
+    });
 
     logger.info("Visit booked successfully", {
       tenantId,
@@ -86,13 +89,12 @@ export class TenantVisitService {
     logger.info("Fetching visits for tenant", { tenantId });
 
     const visits = await this._visitRepo.findByTenantId(tenantId);
-    
 
     logger.info("Visits fetched", { tenantId, count: visits.length });
 
     const mappedVisits = VisitBookingMapper.toResponseDtoList(visits);
-   
-       return mappedVisits;
+
+    return mappedVisits;
   }
 
   async cancelVisit(tenantId: string, visitId: string): Promise<void> {
@@ -104,7 +106,6 @@ export class TenantVisitService {
       throw new AppError("Visit not found", HttpStatus.NOT_FOUND);
     }
 
-   
     if (String(visit.tenantId) !== tenantId) {
       throw new AppError(
         "Unauthorized: This is not your booking",

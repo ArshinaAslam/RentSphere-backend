@@ -1,16 +1,14 @@
 export interface VisitBookingResponseDto {
-  _id:        string;
+  _id: string;
   propertyId: string | PropertySummary;
-  tenantId:   string | TenantSummary;
+  tenantId: string | TenantSummary;
   landlordId: string;
-  date:       string;
-  timeSlot:   string;
-  status:     string;
-  createdAt:  string;
+  date: string;
+  timeSlot: string;
+  status: string;
+  createdAt: string;
 }
 
-
 export interface updateVisitStatusDto {
-    status: "confirmed" | "cancelled" | "completed";
-    
+  status: "confirmed" | "cancelled" | "completed";
 }

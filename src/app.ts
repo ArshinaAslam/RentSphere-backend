@@ -5,7 +5,6 @@ import express from "express";
 import { globalErrorHandler } from "./middleware/error.middleware";
 import adminRoutes from "./routes/adminRoutes";
 import authRoutes from "./routes/auth/auth.routes";
-import kycRoutes from "./routes/auth/kyc.routes";
 import landlordRoutes from "./routes/landlordRoutes";
 import tenantRoutes from "./routes/tenantRoutes";
 
@@ -27,7 +26,6 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/landlord", landlordRoutes);
 app.use("/api/tenant", tenantRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/kyc", kycRoutes);
 
 app.use(globalErrorHandler);
 

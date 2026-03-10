@@ -1,58 +1,52 @@
-
 import type { IVisitBooking } from "../models/visitBookingModel";
 
 interface TenantSummary {
-  id:        string;
+  id: string;
   firstName: string;
-  lastName:  string;
-  email:     string;
-  phone:     string;
-  avatar:    string;
+  lastName: string;
+  email: string;
+  phone: string;
+  avatar: string;
 }
 
 interface PropertySummary {
-  id:      string;
-  title:   string;
+  id: string;
+  title: string;
   address: string;
-  city:    string;
-  images:  string[];
+  city: string;
+  images: string[];
 }
-
 
 interface PopulatedTenant {
-  _id:       unknown;
+  _id: unknown;
   firstName: string;
-  lastName:  string;
-  email:     string;
-  phone:     string;
-  avatar:    string;
+  lastName: string;
+  email: string;
+  phone: string;
+  avatar: string;
 }
 
-
 interface PopulatedProperty {
-  _id:     unknown;
-  title:   string;
+  _id: unknown;
+  title: string;
   address: string;
-  city:    string;
-  images:  string[];
+  city: string;
+  images: string[];
 }
 
 export interface VisitBookingResponseDto {
-  _id:        string;
+  _id: string;
   propertyId: string | PropertySummary;
-  tenantId:   string | TenantSummary;
+  tenantId: string | TenantSummary;
   landlordId: string;
-  date:       string;
-  timeSlot:   string;
-  status:     string;
-  createdAt:  string;
+  date: string;
+  timeSlot: string;
+  status: string;
+  createdAt: string;
 }
 
-
 export class VisitBookingMapper {
-
   static toResponseDto(visit: IVisitBooking): VisitBookingResponseDto {
-
     // Map tenantId
     const tenantId = visit.tenantId;
     const isPopulatedTenant =
@@ -62,12 +56,12 @@ export class VisitBookingMapper {
 
     const mappedTenant: string | TenantSummary = isPopulatedTenant
       ? {
-          id:        String((tenantId as PopulatedTenant)._id),
+          id: String((tenantId as PopulatedTenant)._id),
           firstName: (tenantId as PopulatedTenant).firstName ?? "",
-          lastName:  (tenantId as PopulatedTenant).lastName  ?? "",
-          email:     (tenantId as PopulatedTenant).email     ?? "",
-          phone:     (tenantId as PopulatedTenant).phone     ?? "",
-          avatar:    (tenantId as PopulatedTenant).avatar    ?? "",
+          lastName: (tenantId as PopulatedTenant).lastName ?? "",
+          email: (tenantId as PopulatedTenant).email ?? "",
+          phone: (tenantId as PopulatedTenant).phone ?? "",
+          avatar: (tenantId as PopulatedTenant).avatar ?? "",
         }
       : String(tenantId);
 
@@ -80,23 +74,23 @@ export class VisitBookingMapper {
 
     const mappedProperty: string | PropertySummary = isPopulatedProperty
       ? {
-          id:      String((propertyId as PopulatedProperty)._id),
-          title:   (propertyId as PopulatedProperty).title   ?? "",
+          id: String((propertyId as PopulatedProperty)._id),
+          title: (propertyId as PopulatedProperty).title ?? "",
           address: (propertyId as PopulatedProperty).address ?? "",
-          city:    (propertyId as PopulatedProperty).city    ?? "",
-          images:  (propertyId as PopulatedProperty).images  ?? [],
+          city: (propertyId as PopulatedProperty).city ?? "",
+          images: (propertyId as PopulatedProperty).images ?? [],
         }
       : String(propertyId);
 
     return {
-      _id:        String(visit._id),
+      _id: String(visit._id),
       propertyId: mappedProperty,
-      tenantId:   mappedTenant,
+      tenantId: mappedTenant,
       landlordId: String(visit.landlordId),
-      date:       visit.date,
-      timeSlot:   visit.timeSlot,
-      status:     visit.status,
-      createdAt:  visit.createdAt.toISOString(),
+      date: visit.date,
+      timeSlot: visit.timeSlot,
+      status: visit.status,
+      createdAt: visit.createdAt.toISOString(),
     };
   }
 

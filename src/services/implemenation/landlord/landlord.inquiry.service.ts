@@ -1,14 +1,15 @@
 import { injectable, inject } from "tsyringe";
 
 import { DI_TYPES } from "../../../common/di/types";
+import logger from "../../../utils/logger";
+
+import type { IInquiry } from "../../../models/inquiryModel";
 import type { IInquiryRepository } from "../../../repositories/interface/IInquiryRepository";
 import type {
   ILandlordInquiryService,
   GetInquiriesParams,
   GetInquiriesResult,
 } from "../../interface/landlord/ILandlordInquiryService";
-import type { IInquiry } from "../../../models/inquiryModel";
-import logger from "../../../utils/logger";
 
 @injectable()
 export class LandlordInquiryService implements ILandlordInquiryService {
@@ -19,7 +20,7 @@ export class LandlordInquiryService implements ILandlordInquiryService {
 
   async getLandlordInquiries(
     landlordId: string,
-    params:     GetInquiriesParams,
+    params: GetInquiriesParams,
   ): Promise<GetInquiriesResult> {
     const { page, limit, search } = params;
     const skip = (page - 1) * limit;
@@ -41,8 +42,8 @@ export class LandlordInquiryService implements ILandlordInquiryService {
       this._inquiryRepo.countByLandlordId(landlordId, search),
     ]);
 
-    console.log("inquiriezzzz",inquiries)
-    console.log("total",total)
+    console.log("inquiriezzzz", inquiries);
+    console.log("total", total);
 
     logger.info("Landlord inquiries fetched", {
       landlordId,

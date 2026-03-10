@@ -10,10 +10,10 @@ export interface IVisitBookingRepository extends IBaseRepository<IVisitBooking> 
   ): Promise<IVisitBooking | null>;
   findByTenantId(tenantId: string): Promise<IVisitBooking[]>;
   findTenantBookingForProperty(
-  tenantId:   string,
-  propertyId: string,
-  date:       string,
-): Promise<IVisitBooking | null>;
+    tenantId: string,
+    propertyId: string,
+    date: string,
+  ): Promise<IVisitBooking | null>;
   findByLandlordId(landlordId: string): Promise<IVisitBooking[]>;
   updateStatus(visitId: string, status: string): Promise<IVisitBooking | null>;
 }

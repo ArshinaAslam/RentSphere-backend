@@ -7,7 +7,7 @@ import { authenticateToken } from "../../middleware/auth.middleware";
 import { tenantOnly } from "../../middleware/role.middleware";
 
 const router = Router();
-const inquiryController   = container.resolve(TenantInquiryController);
+const inquiryController = container.resolve(TenantInquiryController);
 
 router.post(
   "/create-inquiry",

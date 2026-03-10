@@ -9,13 +9,13 @@ const router = Router();
 const landlordKycController = container.resolve(LandlordKycController);
 
 router.post(
-  "/landlord/kyc-submit",
+  "/kyc-submit",
   uploadKycImages,
   landlordKycController.submitLandlordKyc.bind(landlordKycController),
 );
 
 router.get(
-  "/landlord/kyc-status",
+  "/kyc-status",
 
   asyncHandler(landlordKycController.getKycStatus.bind(landlordKycController)),
 );

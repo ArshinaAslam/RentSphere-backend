@@ -52,7 +52,6 @@ const VisitBookingSchema: Schema = new Schema(
   },
 );
 
-
 VisitBookingSchema.index(
   { propertyId: 1, date: 1, timeSlot: 1 },
   {

@@ -4,46 +4,46 @@ import type { Document } from "mongoose";
 
 export interface IInquiry extends Document {
   propertyId: string;
-  tenantId:   string;
+  tenantId: string;
   landlordId: string;
-  questions:  string[];
-  message:    string;
-  status:     "unread" | "read";
-  createdAt:  Date;
-  updatedAt:  Date;
+  questions: string[];
+  message: string;
+  status: "unread" | "read";
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const InquirySchema: Schema = new Schema(
   {
     propertyId: {
-      type:     Schema.Types.ObjectId,
-      ref:      "Property",
+      type: Schema.Types.ObjectId,
+      ref: "Property",
       required: true,
-      index:    true,
+      index: true,
     },
     tenantId: {
-      type:     Schema.Types.ObjectId,
-      ref:      "User",
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
-      index:    true,
+      index: true,
     },
     landlordId: {
-      type:     Schema.Types.ObjectId,
-      ref:      "Landlord",
+      type: Schema.Types.ObjectId,
+      ref: "Landlord",
       required: true,
-      index:    true,
+      index: true,
     },
     questions: {
-      type:     [String],
+      type: [String],
       required: true,
     },
     message: {
-      type:    String,
+      type: String,
       default: "",
     },
     status: {
-      type:    String,
-      enum:    ["unread", "read"],
+      type: String,
+      enum: ["unread", "read"],
       default: "unread",
     },
   },

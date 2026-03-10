@@ -21,6 +21,7 @@ export class LandlordKycController implements ILandlordKycController {
   ) {}
 
   async submitLandlordKyc(req: Request, res: Response): Promise<Response> {
+    console.log("KYC ROUTE HIT");
     const body = req.body as {
       email: string;
       aadhaarNumber: string;
@@ -33,6 +34,7 @@ export class LandlordKycController implements ILandlordKycController {
     }
 
     const files = req.files as KycFiles;
+    console.log("files", files);
 
     const dto: SubmitLandlordKycDto = {
       email,

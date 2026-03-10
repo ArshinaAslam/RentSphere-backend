@@ -108,7 +108,7 @@ export class AuthService implements IAuthService {
         avatar: avatar || "",
         googleId,
         isEmailVerified: true,
-        isActive: true,
+        ...(role === "TENANT" && { isActive: true }),
         phone: "",
       };
 
@@ -215,6 +215,7 @@ export class AuthService implements IAuthService {
     await this._redisService.deleteOtp(dto.email);
     await repo.updateByEmail(dto.email, {
       isEmailVerified: true,
+      ...(dto.role === "TENANT" && { isActive: true }),
     });
 
     const user = await repo.findByEmail(dto.email);

@@ -6,6 +6,7 @@ import { DI_TYPES } from "../../../common/di/types";
 import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
 import { ApiResponses } from "../../../common/response/ApiResponse";
+import { ENV } from "../../../config/env";
 import {
   forgotPasswordDto,
   LoginDto,
@@ -18,7 +19,6 @@ import { IAuthService } from "../../../services/interface/auth/IAuthService";
 import { UserRole } from "../../../types/auth.types";
 import logger from "../../../utils/logger";
 import { IAuthController } from "../../interface/auth/IAuthController";
-import { ENV } from "../../../config/env";
 
 @injectable()
 export class AuthController implements IAuthController {
@@ -130,7 +130,7 @@ export class AuthController implements IAuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge:  ENV.REFRESH_TOKEN_MAX_AGE,
+      maxAge: ENV.REFRESH_TOKEN_MAX_AGE,
     });
 
     return res.status(HttpStatus.OK).json({

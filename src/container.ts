@@ -17,6 +17,7 @@ import { LandlordRepository } from "./repositories/implementation/landlord/landl
 import { PropertyRepository } from "./repositories/implementation/property.repository";
 import { TenantRepository } from "./repositories/implementation/tenant/tenantRepository";
 import { VisitBookingRepository } from "./repositories/implementation/visitBooking.repository";
+import { WishlistRepository } from "./repositories/implementation/wishlist.repository";
 import { AdminAuthService } from "./services/implemenation/admin/admin.auth.service";
 import AdminLandlordService from "./services/implemenation/admin/admin.landlord.service";
 import AdminTenantService from "./services/implemenation/admin/admin.tenant.service";
@@ -32,6 +33,7 @@ import { TenantInquiryService } from "./services/implemenation/tenant/tenant.inq
 import { tenantProfileService } from "./services/implemenation/tenant/tenant.profile.service";
 import { TenantPropertyService } from "./services/implemenation/tenant/tenant.property.service";
 import { TenantVisitService } from "./services/implemenation/tenant/tenant.visit.service";
+import { TenantWishlistService } from "./services/implemenation/tenant/tenant.wishlist.service";
 
 // ===== Bind Repositories =====
 container.registerSingleton(DI_TYPES.TenantRepository, TenantRepository);
@@ -51,7 +53,7 @@ container.registerSingleton(
 );
 
 container.registerSingleton(DI_TYPES.InquiryRepository, InquiryRepository);
-
+container.registerSingleton(DI_TYPES.WishlistRepository, WishlistRepository);
 
 // ===== Bind Services =====
 container.registerSingleton(DI_TYPES.AuthService, AuthService);
@@ -70,7 +72,10 @@ container.registerSingleton(
   DI_TYPES.TenantInquiryService,
   TenantInquiryService,
 );
-
+container.registerSingleton(
+  DI_TYPES.TenantWishlistService,
+  TenantWishlistService,
+);
 // container.registerSingleton(DI_TYPES.LandlordAuthService,LandlordAuthService)
 container.registerSingleton(
   DI_TYPES.LandlordProfileService,

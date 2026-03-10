@@ -34,14 +34,6 @@ export class TenantInquiryService implements ITenantInquiryService {
       );
     }
 
-    const countUnreaStatus = await this.findCountUnreadStatus(landlordId);
-    if(countUnreadStatus>=2){
-       throw newAppError(
-        "you can't create new inquiry",
-        
-       )
-    }
-
     await this._inquiryRepo.createInquiry({
       propertyId,
       tenantId,

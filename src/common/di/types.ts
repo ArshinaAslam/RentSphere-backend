@@ -11,6 +11,8 @@ export const DI_TYPES = {
   TenantVisitController: Symbol("TenantVisitController"),
   InquiryRepository: Symbol("InquiryRepository"),
   TenantInquiryService: Symbol("TenantInquiryService"),
+  WishlistRepository: Symbol.for("WishlistRepository"),
+  TenantWishlistService: Symbol.for("TenantWishlistService"),
 
   LandlordRepository: Symbol("LandlordRepository"),
   LandlordAuthService: Symbol("LandlordAuthService"),
