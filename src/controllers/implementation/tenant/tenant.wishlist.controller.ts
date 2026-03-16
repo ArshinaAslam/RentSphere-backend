@@ -39,19 +39,26 @@ export class TenantWishlistController {
       .json(new ApiResponses(true, "Removed from wishlist"));
   }
 
-async getWishlist(req: Request, res: Response): Promise<Response> {
-  const tenantId = typeof req.query.tenantId === "string" ? req.query.tenantId : "";
-  const page     = parseInt(req.query.page  as string) || 1;
-  const limit    = parseInt(req.query.limit as string) || 6;
+  async getWishlist(req: Request, res: Response): Promise<Response> {
+    const tenantId =
+      typeof req.query.tenantId === "string" ? req.query.tenantId : "";
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 6;
 
-  if (!tenantId) {
-    return res.status(HttpStatus.BAD_REQUEST)
-      .json(new ApiResponses(false, "tenantId required"));
+    if (!tenantId) {
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .json(new ApiResponses(false, "tenantId required"));
+    }
+
+    const result = await this._wishlistService.getWishlist({
+      tenantId,
+      page,
+      limit,
+    });
+    console.log("result", result);
+    return res
+      .status(HttpStatus.OK)
+      .json(new ApiResponses(true, "Wishlist fetched", result));
   }
-
-  const result = await this._wishlistService.getWishlist({tenantId, page, limit});
-  console.log("result",result)
-  return res.status(HttpStatus.OK)
-    .json(new ApiResponses(true, "Wishlist fetched", result));
-}
 }
