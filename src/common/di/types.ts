@@ -40,4 +40,7 @@ export const DI_TYPES = {
   EmailService: Symbol("EmailService"),
   AuthService: Symbol("AuthService"),
   UserRepoMap: Symbol("UserRepoMap"),
+  ConversationRepository: Symbol.for("ConversationRepository"),
+  MessageRepository: Symbol.for("MessageRepository"),
+  ChatService: Symbol.for("ChatService"),
 } as const;

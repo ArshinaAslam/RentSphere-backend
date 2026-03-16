@@ -49,3 +49,15 @@ export const uploadMultipleImages = multer({
     }
   },
 }).fields([{ name: "images", maxCount: 20 }]);
+
+export const uploadVoice = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("audio/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Audio files only"));
+    }
+  },
+});

@@ -5,6 +5,7 @@ import express from "express";
 import { globalErrorHandler } from "./middleware/error.middleware";
 import adminRoutes from "./routes/adminRoutes";
 import authRoutes from "./routes/auth/auth.routes";
+import chatRoutes from "./routes/chat/chat.routes";
 import landlordRoutes from "./routes/landlordRoutes";
 import tenantRoutes from "./routes/tenantRoutes";
 
@@ -14,7 +15,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
   }),
@@ -26,6 +27,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/landlord", landlordRoutes);
 app.use("/api/tenant", tenantRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/chat", chatRoutes);
 
 app.use(globalErrorHandler);
 

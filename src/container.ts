@@ -12,8 +12,10 @@ import { TenantProfileController } from "./controllers/implementation/tenant/ten
 import { TenantPropertyController } from "./controllers/implementation/tenant/tenant.property.controller";
 import { TenantVisitController } from "./controllers/implementation/tenant/tenant.visit.controller";
 import { AdminRepository } from "./repositories/implementation/admin/adminRepository";
+import { ConversationRepository } from "./repositories/implementation/conversation.repository";
 import { InquiryRepository } from "./repositories/implementation/inquiry.repository";
 import { LandlordRepository } from "./repositories/implementation/landlord/landlordRepository";
+import { MessageRepository } from "./repositories/implementation/message.repository";
 import { PropertyRepository } from "./repositories/implementation/property.repository";
 import { TenantRepository } from "./repositories/implementation/tenant/tenantRepository";
 import { VisitBookingRepository } from "./repositories/implementation/visitBooking.repository";
@@ -22,6 +24,7 @@ import { AdminAuthService } from "./services/implemenation/admin/admin.auth.serv
 import AdminLandlordService from "./services/implemenation/admin/admin.landlord.service";
 import AdminTenantService from "./services/implemenation/admin/admin.tenant.service";
 import { AuthService } from "./services/implemenation/auth/authService";
+import { ChatService } from "./services/implemenation/chat/chat.service";
 import { EmailService } from "./services/implemenation/emailService";
 import { LandlordInquiryService } from "./services/implemenation/landlord/landlord.inquiry.service";
 import { LandlordKycService } from "./services/implemenation/landlord/landlord.kyc.service";
@@ -55,6 +58,12 @@ container.registerSingleton(
 container.registerSingleton(DI_TYPES.InquiryRepository, InquiryRepository);
 container.registerSingleton(DI_TYPES.WishlistRepository, WishlistRepository);
 
+container.registerSingleton(
+  DI_TYPES.ConversationRepository,
+  ConversationRepository,
+);
+container.registerSingleton(DI_TYPES.MessageRepository, MessageRepository);
+
 // ===== Bind Services =====
 container.registerSingleton(DI_TYPES.AuthService, AuthService);
 
@@ -76,6 +85,8 @@ container.registerSingleton(
   DI_TYPES.TenantWishlistService,
   TenantWishlistService,
 );
+container.registerSingleton(DI_TYPES.ChatService, ChatService);
+
 // container.registerSingleton(DI_TYPES.LandlordAuthService,LandlordAuthService)
 container.registerSingleton(
   DI_TYPES.LandlordProfileService,

@@ -7,10 +7,7 @@ import { ApiResponses } from "../../../common/response/ApiResponse";
 import logger from "../../../utils/logger";
 
 import type { AuthRequest } from "../../../middleware/auth.middleware";
-import type {
-  GetInquiriesParams,
-  ILandlordInquiryService,
-} from "../../../services/interface/landlord/ILandlordInquiryService";
+import type { ILandlordInquiryService } from "../../../services/interface/landlord/ILandlordInquiryService";
 
 @injectable()
 export class LandlordInquiryController {
