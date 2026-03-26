@@ -11,13 +11,15 @@ import { LandlordVisitController } from "./controllers/implementation/landlord/l
 import { TenantProfileController } from "./controllers/implementation/tenant/tenant.profile.controller";
 import { TenantPropertyController } from "./controllers/implementation/tenant/tenant.property.controller";
 import { TenantVisitController } from "./controllers/implementation/tenant/tenant.visit.controller";
-import { AdminRepository } from "./repositories/implementation/admin/adminRepository";
+import { AdminRepository } from "./repositories/implementation/adminRepository";
 import { ConversationRepository } from "./repositories/implementation/conversation.repository";
 import { InquiryRepository } from "./repositories/implementation/inquiry.repository";
-import { LandlordRepository } from "./repositories/implementation/landlord/landlordRepository";
+import { LandlordRepository } from "./repositories/implementation/landlordRepository";
+import { LeaseRepository } from "./repositories/implementation/lease.repository";
 import { MessageRepository } from "./repositories/implementation/message.repository";
+import { PaymentRepository } from "./repositories/implementation/payment.repository";
 import { PropertyRepository } from "./repositories/implementation/property.repository";
-import { TenantRepository } from "./repositories/implementation/tenant/tenantRepository";
+import { TenantRepository } from "./repositories/implementation/tenantRepository";
 import { VisitBookingRepository } from "./repositories/implementation/visitBooking.repository";
 import { WishlistRepository } from "./repositories/implementation/wishlist.repository";
 import { AdminAuthService } from "./services/implemenation/admin/admin.auth.service";
@@ -28,11 +30,15 @@ import { ChatService } from "./services/implemenation/chat/chat.service";
 import { EmailService } from "./services/implemenation/emailService";
 import { LandlordInquiryService } from "./services/implemenation/landlord/landlord.inquiry.service";
 import { LandlordKycService } from "./services/implemenation/landlord/landlord.kyc.service";
+import { LandlordLeaseService } from "./services/implemenation/landlord/landlord.lease.service";
+import { LandlordPaymentService } from "./services/implemenation/landlord/landlord.payment.service";
 import { LandlordProfileService } from "./services/implemenation/landlord/landlord.profile.service";
 import { LandlordPropertyService } from "./services/implemenation/landlord/landlord.property.service";
 import { LandlordVisitService } from "./services/implemenation/landlord/landlord.visit.service";
 import { RedisService } from "./services/implemenation/redisService";
 import { TenantInquiryService } from "./services/implemenation/tenant/tenant.inquiry.service";
+import { TenantLeaseService } from "./services/implemenation/tenant/tenant.lease.service";
+import { TenantPaymentService } from "./services/implemenation/tenant/tenant.payment.service";
 import { tenantProfileService } from "./services/implemenation/tenant/tenant.profile.service";
 import { TenantPropertyService } from "./services/implemenation/tenant/tenant.property.service";
 import { TenantVisitService } from "./services/implemenation/tenant/tenant.visit.service";
@@ -57,12 +63,14 @@ container.registerSingleton(
 
 container.registerSingleton(DI_TYPES.InquiryRepository, InquiryRepository);
 container.registerSingleton(DI_TYPES.WishlistRepository, WishlistRepository);
+container.registerSingleton(DI_TYPES.PaymentRepository, PaymentRepository);
 
 container.registerSingleton(
   DI_TYPES.ConversationRepository,
   ConversationRepository,
 );
 container.registerSingleton(DI_TYPES.MessageRepository, MessageRepository);
+container.registerSingleton(DI_TYPES.LeaseRepository, LeaseRepository);
 
 // ===== Bind Services =====
 container.registerSingleton(DI_TYPES.AuthService, AuthService);
@@ -87,6 +95,17 @@ container.registerSingleton(
 );
 container.registerSingleton(DI_TYPES.ChatService, ChatService);
 
+container.registerSingleton(DI_TYPES.TenantLeaseService, TenantLeaseService);
+container.registerSingleton(
+  DI_TYPES.TenantPaymentService,
+  TenantPaymentService,
+);
+
+container.registerSingleton(
+  DI_TYPES.LandlordPaymentService,
+  LandlordPaymentService,
+);
+
 // container.registerSingleton(DI_TYPES.LandlordAuthService,LandlordAuthService)
 container.registerSingleton(
   DI_TYPES.LandlordProfileService,
@@ -104,6 +123,10 @@ container.registerSingleton(
 container.registerSingleton(
   DI_TYPES.LandlordInquiryService,
   LandlordInquiryService,
+);
+container.registerSingleton(
+  DI_TYPES.LandlordLeaseService,
+  LandlordLeaseService,
 );
 
 container.registerSingleton(DI_TYPES.AdminAuthService, AdminAuthService);

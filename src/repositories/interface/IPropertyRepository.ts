@@ -36,4 +36,5 @@ export interface IPropertyRepository extends IBaseRepository<IProperty> {
   }): Promise<number>;
 
   findTenantPropertyById(id: string): Promise<IProperty | null>;
+  findAllPropertyByLandlordId(landlordId: string): Promise<IProperty[]>;
 }

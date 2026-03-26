@@ -2,16 +2,6 @@ import type { IBaseRepository } from "../../common/repository/IBaseRepository";
 import type { IInquiry } from "../../models/inquiryModel";
 import type { FilterQuery } from "mongoose";
 
-// export interface IInquiryRepository extends IBaseRepository<IInquiry>{
-
-//   createInquiry(data: Partial<IInquiry>): Promise<IInquiry>;
-//   findByPropertyId(propertyId: string):            Promise<IInquiry[]>;
-//   //
-//   findByLandlordId(landlordId: string): Promise<IInquiry[]>;
-//   findByTenantId(tenantId: string):     Promise<IInquiry[]>;
-//   markAsRead(inquiryId: string):        Promise<IInquiry | null>;
-// }
-
 export interface IInquiryRepository extends IBaseRepository<IInquiry> {
   createInquiry(data: Partial<IInquiry>): Promise<IInquiry>;
   findByLandlordId(landlordId: string): Promise<IInquiry[]>;

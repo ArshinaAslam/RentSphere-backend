@@ -1,5 +1,5 @@
-import type { IBaseRepository } from "../../../common/repository/IBaseRepository";
-import type { ILandlord } from "../../../models/landlordModel";
+import type { IBaseRepository } from "../../common/repository/IBaseRepository";
+import type { ILandlord } from "../../models/landlordModel";
 import type { FilterQuery, Query } from "mongoose";
 
 export interface ILandlordRepository extends IBaseRepository<ILandlord> {

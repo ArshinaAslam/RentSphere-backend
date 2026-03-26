@@ -28,6 +28,12 @@ export interface PropertyResponseDto {
   amenities: string[];
   images: string[];
   landlordId: string | LandlordSummaryDto;
+  coordinates?:
+    | {
+        lat: number;
+        lng: number;
+      }
+    | undefined;
 }
 
 export interface GetAllPropertiesResultDto {

@@ -1,5 +1,5 @@
-import type { ILandlordRepository } from "../repositories/interface/landlord/ILandlordRepository";
-import type { ITenantRepository } from "../repositories/interface/tenant/ITenantRepository";
+import type { ILandlordRepository } from "../repositories/interface/ILandlordRepository";
+import type { ITenantRepository } from "../repositories/interface/ITenantRepository";
 
 export type IUserRepoMap = {
   TENANT: ITenantRepository;

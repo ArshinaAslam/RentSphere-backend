@@ -11,7 +11,7 @@ import {
 } from "../../../dto/admin/admin.user.dto";
 import { AdminMapper } from "../../../mappers/admin.mapper";
 import { ITenant } from "../../../models/tenantModel";
-import { ITenantRepository } from "../../../repositories/interface/tenant/ITenantRepository";
+import { ITenantRepository } from "../../../repositories/interface/ITenantRepository";
 import logger from "../../../utils/logger";
 import {
   IAdminTenantService,

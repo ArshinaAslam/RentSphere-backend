@@ -12,7 +12,7 @@ import {
 } from "../../../dto/tenant/tenant.profile.dto";
 import { UserMapper } from "../../../mappers/user.mapper";
 import { ITenant } from "../../../models/tenantModel";
-import { ITenantRepository } from "../../../repositories/interface/tenant/ITenantRepository";
+import { ITenantRepository } from "../../../repositories/interface/ITenantRepository";
 import logger from "../../../utils/logger";
 import { ITenantProfileService } from "../../interface/tenant/ITenantProfileService";
 

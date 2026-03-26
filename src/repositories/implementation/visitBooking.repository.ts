@@ -67,13 +67,40 @@ export class VisitBookingRepository
     } as FilterQuery<IVisitBooking>);
   }
 
-  async findByLandlordId(landlordId: string): Promise<IVisitBooking[]> {
+  async findByLandlordId(
+    landlordId: string,
+    skip: number,
+    limit: number,
+    search: string,
+  ): Promise<IVisitBooking[]> {
+    const query = this._buildQuery(landlordId, search);
     return this.model
-      .find({ landlordId } as FilterQuery<IVisitBooking>)
+      .find(query)
       .populate("propertyId", "title address city images")
       .populate("tenantId", "firstName lastName email phone avatar")
       .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .exec();
+  }
+
+  async countByLandlordId(landlordId: string, search: string): Promise<number> {
+    const query = this._buildQuery(landlordId, search);
+    return this.model.countDocuments(query);
+  }
+
+  private _buildQuery(landlordId: string, search: string) {
+    const base: Record<string, unknown> = { landlordId };
+    if (!search.trim()) return base;
+    const q = search.trim();
+    return {
+      ...base,
+      $or: [
+        { status: { $regex: q, $options: "i" } },
+        { date: { $regex: q, $options: "i" } },
+        { timeSlot: { $regex: q, $options: "i" } },
+      ],
+    };
   }
 
   async updateStatus(

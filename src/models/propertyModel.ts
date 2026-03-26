@@ -22,6 +22,10 @@ export interface IProperty extends Document {
   description: string;
   amenities: string[];
   images: string[];
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -56,6 +60,13 @@ const PropertySchema: Schema = new Schema(
     description: { type: String, required: true },
     amenities: [{ type: String }],
     images: [{ type: String }],
+    coordinates: {
+      type: {
+        lat: { type: Number },
+        lng: { type: Number },
+      },
+      required: false,
+    },
   },
   {
     timestamps: true,

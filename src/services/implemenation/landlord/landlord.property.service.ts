@@ -12,8 +12,9 @@ import {
   PropertyResultDto,
 } from "../../../dto/landlord/landlord.property.dto";
 import { PropertyMapper } from "../../../mappers/property.mapper";
+import { ILandlordRepository } from "../../../repositories/interface/ILandlordRepository";
 import { IPropertyRepository } from "../../../repositories/interface/IPropertyRepository";
-import { ILandlordRepository } from "../../../repositories/interface/landlord/ILandlordRepository";
+import { geocodeAddress } from "../../../utils/geocode";
 import logger from "../../../utils/logger";
 import { ILandlordPropertyService } from "../../interface/landlord/ILandlordPropertyService";
 
@@ -72,6 +73,18 @@ export class LandlordPropertyService implements ILandlordPropertyService {
       }),
     );
 
+    const coordinates: { lat: number; lng: number } | null =
+      await geocodeAddress(dto.address, dto.city, dto.state, dto.pincode);
+
+    if (coordinates) {
+      logger.info("Property geocoded successfully", { coordinates });
+    } else {
+      logger.warn("Could not geocode property address", {
+        address: dto.address,
+        city: dto.city,
+      });
+    }
+
     const property = await this._propertyRepo.createProperty({
       title: dto.title,
       type: dto.type,
@@ -92,6 +105,7 @@ export class LandlordPropertyService implements ILandlordPropertyService {
       amenities: dto.amenities,
       images: imageUrls,
       landlordId: landlordId,
+      ...(coordinates && { coordinates }),
     });
 
     if (!property) {

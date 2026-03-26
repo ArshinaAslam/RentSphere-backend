@@ -22,19 +22,27 @@ export class LandlordVisitService implements ILandlordVisitService {
 
   async getLandlordVisits(
     landlordId: string,
-  ): Promise<VisitBookingResponseDto[]> {
+    page: number,
+    limit: number,
+    search: string,
+  ): Promise<{ visits: VisitBookingResponseDto[]; total: number }> {
     logger.info("Fetching visits for landlord", { landlordId });
+    const skip = (page - 1) * limit;
 
-    const visits = await this._visitRepo.findByLandlordId(landlordId);
+    const [visits, total] = await Promise.all([
+      this._visitRepo.findByLandlordId(landlordId, skip, limit, search),
+      this._visitRepo.countByLandlordId(landlordId, search),
+    ]);
 
     logger.info("Landlord visits fetched", {
       landlordId,
       count: visits.length,
     });
 
-    const mappedVisits = VisitBookingMapper.toResponseDtoList(visits);
-
-    return mappedVisits;
+    return {
+      visits: VisitBookingMapper.toResponseDtoList(visits),
+      total,
+    };
   }
 
   async updateVisitStatus(

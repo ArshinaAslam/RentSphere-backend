@@ -136,7 +136,7 @@ export class AuthService implements IAuthService {
       role: user.role,
     };
     const accessToken = jwt.sign(payloadJwt, ENV.JWT_ACCESS_SECRET, {
-      expiresIn: "15m",
+      expiresIn: "30m",
     });
     const refreshToken = jwt.sign(payloadJwt, ENV.JWT_REFRESH_SECRET, {
       expiresIn: "7d",
@@ -304,7 +304,7 @@ export class AuthService implements IAuthService {
     };
 
     const accessToken = jwt.sign(payload, ENV.JWT_ACCESS_SECRET, {
-      expiresIn: "15m",
+      expiresIn: "30m",
     });
     const refreshToken = jwt.sign(payload, ENV.JWT_REFRESH_SECRET, {
       expiresIn: "7d",
@@ -453,7 +453,7 @@ export class AuthService implements IAuthService {
       role: decoded.role,
     };
     const newAccessToken = jwt.sign(payload, ENV.JWT_ACCESS_SECRET, {
-      expiresIn: "15m",
+      expiresIn: "30m",
     });
 
     logger.info("Token refresh success", { userId: decoded.userId });

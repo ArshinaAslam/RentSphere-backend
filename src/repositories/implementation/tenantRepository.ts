@@ -1,9 +1,9 @@
 import { FilterQuery, Query } from "mongoose";
 import { injectable } from "tsyringe";
 
-import { BaseRepository } from "../../../common/repository/BaseRepository";
-import { ITenant, TenantModel } from "../../../models/tenantModel";
-import { ITenantRepository } from "../../../repositories/interface/tenant/ITenantRepository";
+import { BaseRepository } from "../../common/repository/BaseRepository";
+import { ITenant, TenantModel } from "../../models/tenantModel";
+import { ITenantRepository } from "../interface/ITenantRepository";
 
 @injectable()
 export class TenantRepository
@@ -44,5 +44,21 @@ export class TenantRepository
     updateData: Partial<ITenant>,
   ): Promise<ITenant | null> {
     return this.update(id, updateData);
+  }
+
+  async searchByQuery(query: string, tenantIds: string[]): Promise<ITenant[]> {
+    return this.model
+      .find({
+        _id: { $in: tenantIds },
+        $or: [
+          { phone: { $regex: query, $options: "i" } },
+          { email: { $regex: query, $options: "i" } },
+          { firstName: { $regex: query, $options: "i" } },
+          { lastName: { $regex: query, $options: "i" } },
+        ],
+      })
+      .select("firstName lastName email phone avatar")
+      .limit(10)
+      .exec();
   }
 }

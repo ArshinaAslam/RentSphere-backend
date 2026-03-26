@@ -97,7 +97,7 @@ export class LandlordPropertyController implements ILandlordPropertyController {
   ): Promise<Response> {
     logger.info("Fetch single property");
 
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
 
     if (!propertyId) {
       return res
@@ -128,11 +128,11 @@ export class LandlordPropertyController implements ILandlordPropertyController {
     res: Response,
   ): Promise<Response> {
     logger.info("Delete property request", {
-      propertyId: req.params.id,
+      propertyId: req.params.propertyId,
       landlordId: req.user?.userId,
     });
 
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
 
     if (!propertyId) {
       return res
@@ -163,11 +163,11 @@ export class LandlordPropertyController implements ILandlordPropertyController {
     res: Response,
   ): Promise<Response> {
     logger.info("Landlord property edit request", {
-      propertyId: req.params.id,
+      propertyId: req.params.propertyId,
       landlordId: req.user?.userId,
     });
 
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
     const landlordId = req.user?.userId;
 
     if (!landlordId || !propertyId) {

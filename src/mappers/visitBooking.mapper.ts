@@ -47,7 +47,6 @@ export interface VisitBookingResponseDto {
 
 export class VisitBookingMapper {
   static toResponseDto(visit: IVisitBooking): VisitBookingResponseDto {
-    // Map tenantId
     const tenantId = visit.tenantId;
     const isPopulatedTenant =
       typeof tenantId === "object" &&
@@ -65,7 +64,6 @@ export class VisitBookingMapper {
         }
       : String(tenantId);
 
-    // Map propertyId
     const propertyId = visit.propertyId;
     const isPopulatedProperty =
       typeof propertyId === "object" &&
