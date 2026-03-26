@@ -42,9 +42,6 @@ export class LandlordInquiryService implements ILandlordInquiryService {
       this._inquiryRepo.countByLandlordId(landlordId, search),
     ]);
 
-    console.log("inquiriezzzz", inquiries);
-    console.log("total", total);
-
     logger.info("Landlord inquiries fetched", {
       landlordId,
       count: inquiries.length,

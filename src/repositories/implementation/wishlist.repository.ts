@@ -27,17 +27,6 @@ export class WishlistRepository
     } as FilterQuery<IWishlist>);
   }
 
-  //   async findByTenantId(tenantId: string): Promise<IWishlist[]> {
-  //     return this.model
-  //       .find({ tenantId } as FilterQuery<IWishlist>)
-  //       .populate(
-  //         "propertyId",
-  //         "title address city images price bhk type furnishing bedrooms bathrooms area status",
-  //       )
-  //       .sort({ createdAt: -1 })
-  //       .exec();
-  //   }
-
   async isWishlisted(data: FilterQuery<IWishlist>): Promise<boolean> {
     const exists = await this.findOne(data);
     return !!exists;

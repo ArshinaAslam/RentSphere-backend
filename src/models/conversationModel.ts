@@ -54,7 +54,6 @@ const ConversationSchema: Schema = new Schema(
   { timestamps: true },
 );
 
-// One conversation per tenant-landlord pair
 ConversationSchema.index({ tenantId: 1, landlordId: 1 }, { unique: true });
 
 export default mongoose.models.Conversation ||

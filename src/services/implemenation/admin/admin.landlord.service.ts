@@ -14,7 +14,7 @@ import {
 } from "../../../dto/admin/admin.user.dto";
 import { AdminMapper } from "../../../mappers/admin.mapper";
 import { ILandlord } from "../../../models/landlordModel";
-import { ILandlordRepository } from "../../../repositories/interface/landlord/ILandlordRepository";
+import { ILandlordRepository } from "../../../repositories/interface/ILandlordRepository";
 import logger from "../../../utils/logger";
 import {
   IAdminLandlordService,

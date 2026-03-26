@@ -1,8 +1,10 @@
-import type { IBaseRepository } from "../../../common/repository/IBaseRepository";
-import type { ITenant } from "../../../models/tenantModel";
+import type { IBaseRepository } from "../../common/repository/IBaseRepository";
+import type { ITenant } from "../../models/tenantModel";
 import type { FilterQuery, Query } from "mongoose";
 
 export interface ITenantRepository extends IBaseRepository<ITenant> {
+  // findById(userId: string): unknown;
+  // update(userId: string, updateData: Partial<ITenant>): unknown;
   findByEmail(email: string): Promise<ITenant | null>;
   updateByEmail(
     email: string,
@@ -15,4 +17,6 @@ export interface ITenantRepository extends IBaseRepository<ITenant> {
     id: string,
     updateData: Partial<ITenant>,
   ): Promise<ITenant | null>;
+
+  searchByQuery(query: string, tenantIds: string[]): Promise<ITenant[]>;
 }

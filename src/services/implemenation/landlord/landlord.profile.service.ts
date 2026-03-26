@@ -11,7 +11,7 @@ import {
 } from "../../../dto/landlord/landlord.profile.dto";
 import { UserMapper } from "../../../mappers/user.mapper";
 import { ILandlord } from "../../../models/landlordModel";
-import { ILandlordRepository } from "../../../repositories/interface/landlord/ILandlordRepository";
+import { ILandlordRepository } from "../../../repositories/interface/ILandlordRepository";
 import logger from "../../../utils/logger";
 import { IEmailService } from "../../interface/IEmailService";
 import { IRedisService } from "../../interface/IRedisService";

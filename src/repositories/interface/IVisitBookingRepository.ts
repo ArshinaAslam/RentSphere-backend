@@ -14,6 +14,12 @@ export interface IVisitBookingRepository extends IBaseRepository<IVisitBooking> 
     propertyId: string,
     date: string,
   ): Promise<IVisitBooking | null>;
-  findByLandlordId(landlordId: string): Promise<IVisitBooking[]>;
+  findByLandlordId(
+    landlordId: string,
+    skip: number,
+    limit: number,
+    search: string,
+  ): Promise<IVisitBooking[]>;
+  countByLandlordId(landlordId: string, search: string): Promise<number>;
   updateStatus(visitId: string, status: string): Promise<IVisitBooking | null>;
 }

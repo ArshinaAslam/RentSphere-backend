@@ -56,7 +56,7 @@ export class TenantWishlistController {
       page,
       limit,
     });
-    console.log("result", result);
+
     return res
       .status(HttpStatus.OK)
       .json(new ApiResponses(true, "Wishlist fetched", result));

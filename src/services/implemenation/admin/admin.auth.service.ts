@@ -11,7 +11,7 @@ import {
   AdminResponseDto,
 } from "../../../dto/admin/admin.auth.dto";
 import { AdminMapper } from "../../../mappers/admin.mapper";
-import { IAdminRepository } from "../../../repositories/interface/admin/IAdminReposiory";
+import { IAdminRepository } from "../../../repositories/interface/IAdminReposiory";
 import logger from "../../../utils/logger";
 import { IAdminAuthService } from "../../interface/admin/IAdminAuthService";
 

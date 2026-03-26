@@ -130,7 +130,6 @@ export const initSocket = (httpServer: HttpServer): SocketServer => {
       void socket.leave(conversationId);
     });
 
-    // ── Send message via socket ──
     socket.on(
       "message:send",
       (data: {
@@ -170,7 +169,6 @@ export const initSocket = (httpServer: HttpServer): SocketServer => {
       },
     );
 
-    // ── Typing indicators ──
     socket.on(
       "typing:start",
       (data: { conversationId: string; userId: string }) => {
@@ -189,7 +187,6 @@ export const initSocket = (httpServer: HttpServer): SocketServer => {
       },
     );
 
-    // ── Mark messages as read ──
     socket.on(
       "messages:read",
       (data: { conversationId: string; userId: string }) => {
@@ -210,7 +207,6 @@ export const initSocket = (httpServer: HttpServer): SocketServer => {
       },
     );
 
-    // ── Disconnect ──
     socket.on("disconnect", () => {
       const userId = socket.data.userId;
       if (userId) {
@@ -218,8 +214,6 @@ export const initSocket = (httpServer: HttpServer): SocketServer => {
         io.emit("user:status", { userId, isOnline: false });
       }
     });
-
-    // Add inside io.on("connection") in socket.ts
 
     socket.on("call:offer", (data) => {
       const targetSocketId = onlineUsers.get(data.to);
@@ -250,13 +244,6 @@ export const initSocket = (httpServer: HttpServer): SocketServer => {
         });
       }
     });
-
-    // socket.on("call:end", (data) => {
-    //   const targetSocketId = onlineUsers.get(data.to);
-    //   if (targetSocketId) {
-    //     io.to(targetSocketId).emit("call:ended");
-    //   }
-    // });
 
     socket.on("call:end", (data) => {
       const targetSocketId = onlineUsers.get(data.to);

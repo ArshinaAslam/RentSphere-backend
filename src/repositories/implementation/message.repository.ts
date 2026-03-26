@@ -79,7 +79,7 @@ export class MessageRepository
   async findCallMessages(conversationIds: string[]): Promise<IMessage[]> {
     return this.model
       .find({
-        conversationId: { $in: conversationIds }, // ← filter by conversations
+        conversationId: { $in: conversationIds },
         $or: [
           { content: { $regex: /^Voice call/ } },
           { content: { $regex: /^Video call/ } },

@@ -1,8 +1,8 @@
 import { injectable } from "tsyringe";
 
-import { BaseRepository } from "../../../common/repository/BaseRepository";
-import { AdminModel, IAdmin } from "../../../models/adminModel";
-import { IAdminRepository } from "../../../repositories/interface/admin/IAdminReposiory";
+import { BaseRepository } from "../../common/repository/BaseRepository";
+import { AdminModel, IAdmin } from "../../models/adminModel";
+import { IAdminRepository } from "../../repositories/interface/IAdminReposiory";
 
 @injectable()
 export class AdminRepository

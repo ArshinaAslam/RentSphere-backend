@@ -19,6 +19,12 @@ export interface PropertyResponseDto {
   amenities: string[];
   images: string[];
   landlordId?: string | object;
+  // coordinates?:
+  //   | {
+  //       lat: number;
+  //       lng: number;
+  //     }
+  //   | undefined;
 }
 
 export interface AddPropertyDto {
@@ -40,6 +46,10 @@ export interface AddPropertyDto {
   description: string;
   amenities: string[];
   landlordId?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
 }
 
 export interface EditPropertyDto {

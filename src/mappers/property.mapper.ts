@@ -4,7 +4,6 @@ import type { IProperty } from "../models/propertyModel";
 
 export class PropertyMapper {
   static toResponseDto(property: IProperty): PropertyResponseDto {
-    // landlordId can be a populated object or just an ObjectId
     const landlordId = property.landlordId;
     const isPopulated =
       typeof landlordId === "object" &&
@@ -43,6 +42,7 @@ export class PropertyMapper {
       amenities: property.amenities,
       images: property.images,
       landlordId: mappedLandlord,
+      coordinates: property.coordinates ?? undefined,
     };
   }
 

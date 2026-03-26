@@ -11,8 +11,6 @@ import {
 import { VisitBookingRepository } from "../../../repositories/implementation/visitBooking.repository";
 import logger from "../../../utils/logger";
 
-import type { IVisitBooking } from "../../../models/visitBookingModel";
-
 @injectable()
 export class TenantVisitService {
   constructor(

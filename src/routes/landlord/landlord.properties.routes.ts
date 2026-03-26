@@ -31,10 +31,11 @@ router.get(
     landlordPropertyController,
   ),
 );
+
 // router.post('/edit-properties',authenticateToken,landlordOnly,asyncHandler(landlordPropertiesController.changeLandlordPassword.bind(landlordPropertiesController)))
 
 router.get(
-  "/single-property/:id",
+  "/single-property/:propertyId",
   authenticateToken,
   landlordOnly,
   asyncHandler(
@@ -45,7 +46,7 @@ router.get(
 );
 
 router.delete(
-  "/single-property/:id",
+  "/single-property/:propertyId",
   authenticateToken,
   landlordOnly,
   asyncHandler(
@@ -56,7 +57,7 @@ router.delete(
 );
 
 router.put(
-  "/edit-property/:id",
+  "/edit-property/:propertyId",
   uploadMultipleImages,
   authenticateToken,
   landlordOnly,

@@ -26,7 +26,7 @@ export class TenantPropertyService implements ITenantPropertyService {
   ): Promise<GetAllPropertiesResultDto> {
     const { page, limit, search, bhk, type, minPrice, maxPrice } = params;
     const pageNum = Number(page) || 1;
-    const limitNum = Number(limit) || 9;
+    const limitNum = Number(limit) || 3;
     const skip = (pageNum - 1) * limitNum;
 
     const queryParams: PropertyQueryParams = {};
@@ -68,7 +68,7 @@ export class TenantPropertyService implements ITenantPropertyService {
 
     logger.info("Property fetched successfully", { propertyId: id });
     const mappedProperty = PropertyMapper.toResponseDto(property);
-    console.log("property details?>", mappedProperty);
+
     return {
       property: mappedProperty,
     };

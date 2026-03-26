@@ -18,22 +18,31 @@ export class LandlordVisitController {
   ) {}
 
   async getLandlordVisits(req: AuthRequest, res: Response): Promise<Response> {
-    logger.info("Landlord fetching visit requests");
-
     const landlordId = req.user?.userId;
-
     if (!landlordId) {
       return res
         .status(HttpStatus.UNAUTHORIZED)
         .json(new ApiResponses(false, "User not authenticated", {}));
     }
 
-    const visits =
-      await this._landlordVisitService.getLandlordVisits(landlordId);
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.max(1, parseInt(req.query.limit as string) || 10);
+    const search = (req.query.search as string) ?? "";
+
+    const { visits, total } =
+      await this._landlordVisitService.getLandlordVisits(
+        landlordId,
+        page,
+        limit,
+        search,
+      );
 
     return res.status(HttpStatus.OK).json(
       new ApiResponses(true, "Visit requests fetched successfully", {
         visits,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
       }),
     );
   }

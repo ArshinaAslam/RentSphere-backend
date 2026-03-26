@@ -1,9 +1,9 @@
 import { FilterQuery } from "mongoose";
 import { injectable } from "tsyringe";
 
-import { BaseRepository } from "../../../common/repository/BaseRepository";
-import { ILandlord, LandlordModel } from "../../../models/landlordModel";
-import { ILandlordRepository } from "../../../repositories/interface/landlord/ILandlordRepository";
+import { BaseRepository } from "../../common/repository/BaseRepository";
+import { ILandlord, LandlordModel } from "../../models/landlordModel";
+import { ILandlordRepository } from "../interface/ILandlordRepository";
 
 import type { Query } from "mongoose";
 

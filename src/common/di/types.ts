@@ -13,6 +13,11 @@ export const DI_TYPES = {
   TenantInquiryService: Symbol("TenantInquiryService"),
   WishlistRepository: Symbol.for("WishlistRepository"),
   TenantWishlistService: Symbol.for("TenantWishlistService"),
+  LeaseRepository: Symbol.for("LeaseRepository"),
+  TenantLeaseService: Symbol.for("TenantLeaseService"),
+  TenantPaymentService: Symbol.for("TenantPaymentService"),
+  PaymentRepository: Symbol.for("PaymentRepository"),
+  LandlordPaymentService: Symbol.for("LandlordPaymentService"),
 
   LandlordRepository: Symbol("LandlordRepository"),
   LandlordAuthService: Symbol("LandlordAuthService"),
@@ -27,6 +32,7 @@ export const DI_TYPES = {
   LandlordVisitService: Symbol("LandlordVisitService"),
   LandlordVisitController: Symbol("LandlordVisitController"),
   LandlordInquiryService: Symbol("LandlordInquiryService"),
+  LandlordLeaseService: Symbol.for("LandlordLeaseService"),
 
   AdminRepository: Symbol("AdminRepository"),
   AdminAuthService: Symbol("AdminAuthService"),

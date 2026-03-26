@@ -148,4 +148,11 @@ export class PropertyRepository
       })
       .lean();
   }
+
+  async findAllPropertyByLandlordId(landlordId: string): Promise<IProperty[]> {
+    return this.model
+      .find({ landlordId } as FilterQuery<IProperty>)
+      .sort({ createdAt: -1 })
+      .exec();
+  }
 }
