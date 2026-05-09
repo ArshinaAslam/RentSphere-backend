@@ -1,3 +1,5 @@
+import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
+
 import { MESSAGES } from "../common/constants/statusMessages";
 import { HttpStatus } from "../common/enums/httpStatus.enum";
 import { AppError } from "../common/errors/appError";
@@ -22,6 +24,21 @@ export function globalErrorHandler(
     return res
       .status(err.statuscode)
       .json({ success: false, message: err.message });
+  }
+
+  if (err instanceof TokenExpiredError) {
+    logger.warn("JWT token expired", { url: req.url });
+    return res.status(HttpStatus.UNAUTHORIZED).json({
+      success: false,
+      message: "Refresh token expired. Please login again.",
+    });
+  }
+
+  if (err instanceof JsonWebTokenError) {
+    logger.warn("JWT token invalid", { url: req.url });
+    return res
+      .status(HttpStatus.UNAUTHORIZED)
+      .json({ success: false, message: "Invalid token. Please login again." });
   }
 
   console.error("UNHANDLED ERROR:", err);

@@ -1,5 +1,6 @@
 import { injectable, inject } from "tsyringe";
 
+import { MESSAGES } from "../../../common/constants/statusMessages";
 import { DI_TYPES } from "../../../common/di/types";
 import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
@@ -8,12 +9,25 @@ import {
   AddPropertyDto,
   EditPropertyDto,
   GetPropertiesResultDto,
+  GetPropertyLeasesDto,
+  GetPropertyPaymentsDto,
   GetPropertyResultDto,
+  GetPropertyReviewsDto,
   PropertyResultDto,
 } from "../../../dto/landlord/landlord.property.dto";
+import { ReviewResponseDto } from "../../../dto/tenant/tenant.review.dto";
+import { LeaseMapper, LeaseResponseDto } from "../../../mappers/lease.mapper";
+import {
+  PaymentMapper,
+  PaymentResponseDto,
+} from "../../../mappers/payment.mapper";
 import { PropertyMapper } from "../../../mappers/property.mapper";
+import { ReviewMapper } from "../../../mappers/review.mapper";
 import { ILandlordRepository } from "../../../repositories/interface/ILandlordRepository";
+import { ILeaseRepository } from "../../../repositories/interface/ILeaseRepository";
+import { IPaymentRepository } from "../../../repositories/interface/IPaymentRepository";
 import { IPropertyRepository } from "../../../repositories/interface/IPropertyRepository";
+import { IReviewRepository } from "../../../repositories/interface/IReviewRepository";
 import { geocodeAddress } from "../../../utils/geocode";
 import logger from "../../../utils/logger";
 import { ILandlordPropertyService } from "../../interface/landlord/ILandlordPropertyService";
@@ -25,6 +39,12 @@ export class LandlordPropertyService implements ILandlordPropertyService {
     private readonly _landlordRepo: ILandlordRepository,
     @inject(DI_TYPES.PropertyRepository)
     private readonly _propertyRepo: IPropertyRepository,
+    @inject(DI_TYPES.LeaseRepository)
+    private readonly _leaseRepo: ILeaseRepository,
+    @inject(DI_TYPES.PaymentRepository)
+    private readonly _paymentRepo: IPaymentRepository,
+    @inject(DI_TYPES.ReviewRepository)
+    private readonly _reviewRepo: IReviewRepository,
   ) {}
 
   async addProperty(
@@ -32,23 +52,26 @@ export class LandlordPropertyService implements ILandlordPropertyService {
     imageFiles: Express.Multer.File[],
   ): Promise<PropertyResultDto> {
     if (!dto.landlordId) {
-      throw new AppError("landlordId is required", HttpStatus.BAD_REQUEST);
+      throw new AppError(
+        MESSAGES.PROPERTY.LANDLORD_ID_REQUIRED,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (imageFiles.length === 0) {
       throw new AppError(
-        "At least 1 property image required",
+        MESSAGES.PROPERTY.IMAGE_REQUIRED,
         HttpStatus.BAD_REQUEST,
       );
     }
 
     if (imageFiles.length > 10) {
-      throw new AppError("Maximum 10 images allowed", HttpStatus.BAD_REQUEST);
+      throw new AppError(MESSAGES.PROPERTY.MAX_IMAGES, HttpStatus.BAD_REQUEST);
     }
 
     if (!dto.title || !dto.type || !dto.price) {
       throw new AppError(
-        "Title, type, and price required",
+        MESSAGES.PROPERTY.REQUIRED_FIELDS,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -57,11 +80,14 @@ export class LandlordPropertyService implements ILandlordPropertyService {
 
     const landlord = await this._landlordRepo.findById(landlordId);
     if (!landlord) {
-      throw new AppError("Landlord not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.PROPERTY.LANDLORD_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
     if (landlord.kycStatus !== "APPROVED") {
       throw new AppError(
-        "KYC not approved. Cannot list properties",
+        MESSAGES.PROPERTY.KYC_NOT_APPROVED,
         HttpStatus.FORBIDDEN,
       );
     }
@@ -110,7 +136,7 @@ export class LandlordPropertyService implements ILandlordPropertyService {
 
     if (!property) {
       throw new AppError(
-        "Failed to create property",
+        MESSAGES.PROPERTY.CREATE_FAILED,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -130,13 +156,13 @@ export class LandlordPropertyService implements ILandlordPropertyService {
   async getLandlordProperties(
     landlordId: string,
     page: number = 1,
-    limit: number = 6,
+    limit: number = 2,
     search: string = "",
   ): Promise<GetPropertiesResultDto> {
     const landlord = await this._landlordRepo.findById(landlordId);
     if (!landlord || landlord.kycStatus !== "APPROVED") {
       throw new AppError(
-        "Landlord not found or KYC not approved",
+        MESSAGES.PROPERTY.LANDLORD_INVALID,
         HttpStatus.FORBIDDEN,
       );
     }
@@ -170,12 +196,15 @@ export class LandlordPropertyService implements ILandlordPropertyService {
     const property = await this._propertyRepo.findPropertyById(propertyId);
 
     if (!property) {
-      throw new AppError("Property not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.PROPERTY.PROPERTY_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     if (property.landlordId.toString() !== landlordId) {
       throw new AppError(
-        "Unauthorized access to property",
+        MESSAGES.PROPERTY.UNAUTHORIZED_ACCESS,
         HttpStatus.FORBIDDEN,
       );
     }
@@ -194,12 +223,15 @@ export class LandlordPropertyService implements ILandlordPropertyService {
     const property = await this._propertyRepo.findPropertyById(propertyId);
 
     if (!property) {
-      throw new AppError("Property not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.PROPERTY.PROPERTY_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     if (property.landlordId.toString() !== landlordId) {
       throw new AppError(
-        "Unauthorized access to property",
+        MESSAGES.PROPERTY.UNAUTHORIZED_ACCESS,
         HttpStatus.FORBIDDEN,
       );
     }
@@ -217,19 +249,25 @@ export class LandlordPropertyService implements ILandlordPropertyService {
   ): Promise<PropertyResultDto> {
     const existingProperty = await this._propertyRepo.findById(propertyId);
     if (!existingProperty) {
-      throw new AppError("Property not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.PROPERTY.PROPERTY_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     if (existingProperty.landlordId.toString() !== landlordId) {
       throw new AppError(
-        "Unauthorized: You can only edit your own properties",
+        MESSAGES.PROPERTY.EDIT_UNAUTHORIZED,
         HttpStatus.FORBIDDEN,
       );
     }
 
     const landlord = await this._landlordRepo.findById(landlordId);
     if (!landlord) {
-      throw new AppError("Landlord not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.PROPERTY.LANDLORD_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     let imageUrls: string[] = [];
@@ -259,6 +297,20 @@ export class LandlordPropertyService implements ILandlordPropertyService {
       imageUrls = [...imageUrls, ...newImageUrls];
     }
 
+    const coordinates: { lat: number; lng: number } | null =
+      await geocodeAddress(
+        dto.address ?? existingProperty.address,
+        dto.city ?? existingProperty.city,
+        dto.state ?? existingProperty.state,
+        dto.pincode ?? existingProperty.pincode,
+      );
+
+    if (coordinates) {
+      logger.info("Property re-geocoded on edit", { coordinates });
+    } else {
+      logger.warn("Could not geocode on edit", { propertyId });
+    }
+
     const property = await this._propertyRepo.updateProperty(propertyId, {
       title: dto.title,
       type: dto.type,
@@ -279,11 +331,12 @@ export class LandlordPropertyService implements ILandlordPropertyService {
       amenities: dto.amenities,
       images: imageUrls,
       landlordId: landlordId,
+      ...(coordinates && { coordinates }),
     });
 
     if (!property) {
       throw new AppError(
-        "Failed to update property",
+        MESSAGES.PROPERTY.UPDATE_FAILED,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -297,6 +350,101 @@ export class LandlordPropertyService implements ILandlordPropertyService {
     return {
       propertyId: String(property._id),
       property: PropertyMapper.toResponseDto(property),
+    };
+  }
+
+  async getPropertyLeases(dto: GetPropertyLeasesDto): Promise<{
+    leases: LeaseResponseDto[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const property = await this._propertyRepo.findPropertyById(dto.propertyId);
+    if (!property)
+      throw new AppError(
+        MESSAGES.PROPERTY.PROPERTY_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
+    if (String(property.landlordId) !== dto.landlordId)
+      throw new AppError(
+        MESSAGES.PROPERTY.UNAUTHORIZED_ACCESS,
+        HttpStatus.FORBIDDEN,
+      );
+
+    const { data, total } = await this._leaseRepo.findByPropertyId(
+      dto.propertyId,
+      dto.page,
+      dto.limit,
+      dto.status,
+    );
+    return {
+      leases: LeaseMapper.toDtoList(data),
+      total,
+      page: dto.page,
+      limit: dto.limit,
+    };
+  }
+
+  async getPropertyPayments(dto: GetPropertyPaymentsDto): Promise<{
+    payments: PaymentResponseDto[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const property = await this._propertyRepo.findPropertyById(dto.propertyId);
+    if (!property)
+      throw new AppError(
+        MESSAGES.PROPERTY.PROPERTY_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
+    if (String(property.landlordId) !== dto.landlordId)
+      throw new AppError(
+        MESSAGES.PROPERTY.UNAUTHORIZED_ACCESS,
+        HttpStatus.FORBIDDEN,
+      );
+    const { data, total } = await this._paymentRepo.findByPropertyId(
+      dto.propertyId,
+      dto.page,
+      dto.limit,
+      dto.type,
+      dto.status,
+    );
+    return {
+      payments: PaymentMapper.toDtoList(data),
+      total,
+      page: dto.page,
+      limit: dto.limit,
+    };
+  }
+
+  async getPropertyReviews(dto: GetPropertyReviewsDto): Promise<{
+    reviews: ReviewResponseDto[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const property = await this._propertyRepo.findPropertyById(dto.propertyId);
+    if (!property)
+      throw new AppError(
+        MESSAGES.PROPERTY.PROPERTY_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
+    if (String(property.landlordId) !== dto.landlordId)
+      throw new AppError(
+        MESSAGES.PROPERTY.UNAUTHORIZED_ACCESS,
+        HttpStatus.FORBIDDEN,
+      );
+
+    const { data, total } = await this._reviewRepo.findByPropertyId(
+      dto.propertyId,
+      dto.page,
+      dto.limit,
+    );
+    return {
+      reviews: ReviewMapper.toResponseDtoList(data),
+      total,
+      page: dto.page,
+      limit: dto.limit,
     };
   }
 }

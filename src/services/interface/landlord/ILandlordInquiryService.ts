@@ -18,4 +18,5 @@ export interface ILandlordInquiryService {
     landlordId: string,
     params: GetInquiriesParams,
   ): Promise<GetInquiriesResult>;
+  markAsRead(inquiryId: string): Promise<void>;
 }

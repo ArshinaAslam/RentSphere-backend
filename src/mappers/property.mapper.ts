@@ -43,6 +43,9 @@ export class PropertyMapper {
       images: property.images,
       landlordId: mappedLandlord,
       coordinates: property.coordinates ?? undefined,
+      ...(property.createdAt && {
+        createdAt: new Date(property.createdAt).toISOString(),
+      }),
     };
   }
 

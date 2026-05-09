@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { container } from "tsyringe";
 
-import { LandlordPaymentController } from "../../controllers/implementation/landlord/landlord.payment.controller";
+import { LandlordPaymentController } from "../../controllers/landlord/landlord.payment.controller";
 import { asyncHandler } from "../../middleware/asyncHandler";
 import { authenticateToken } from "../../middleware/auth.middleware";
 import { landlordOnly } from "../../middleware/role.middleware";
@@ -17,6 +17,15 @@ router.get(
     landlordPaymentController.getLandlordPayments.bind(
       landlordPaymentController,
     ),
+  ),
+);
+
+router.get(
+  "/details/:paymentId",
+  authenticateToken,
+  landlordOnly,
+  asyncHandler(
+    landlordPaymentController.getPaymentById.bind(landlordPaymentController),
   ),
 );
 

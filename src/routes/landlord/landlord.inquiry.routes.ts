@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { container } from "tsyringe";
 
-import { LandlordInquiryController } from "../../controllers/implementation/landlord/landlord.inquiry.controller";
+import { LandlordInquiryController } from "../../controllers/landlord/landlord.inquiry.controller";
 import { asyncHandler } from "../../middleware/asyncHandler";
 import { authenticateToken } from "../../middleware/auth.middleware";
 import { landlordOnly } from "../../middleware/role.middleware";
@@ -14,6 +14,13 @@ router.get(
   authenticateToken,
   landlordOnly,
   asyncHandler(inquiryController.getLandlordInquiries.bind(inquiryController)),
+);
+
+router.patch(
+  "/:inquiryId/read",
+  authenticateToken,
+  landlordOnly,
+  asyncHandler(inquiryController.markInquiryAsRead.bind(inquiryController)),
 );
 
 export default router;

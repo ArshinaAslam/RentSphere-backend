@@ -4,5 +4,4 @@ import type { ITenantRepository } from "../repositories/interface/ITenantReposit
 export type IUserRepoMap = {
   TENANT: ITenantRepository;
   LANDLORD: ILandlordRepository;
-  //   ADMIN: IAdminRepository;
 };

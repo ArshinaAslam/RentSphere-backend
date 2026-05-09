@@ -1,3 +1,5 @@
+import type { PaymentResponseDto } from "../../mappers/payment.mapper";
+
 export interface CreateDepositOrderDto {
   leaseId: string;
 }
@@ -15,18 +17,26 @@ export interface VerifyPaymentDto {
   paymentId: string;
 }
 
-// export interface GetPaymentsQueryDto {
-//   page: number;
-//   limit: number;
-//   search?: string;
-//   type?: "deposit" | "rent" | "late_fee" | "refund";
-//   status?: "pending" | "completed" | "failed";
-// }
-
 export interface GetPaymentsQueryDto {
   page?: string;
   limit?: string;
   search?: string;
   type?: string;
   status?: string;
+}
+
+export interface GetTenantPropertyPaymentsDto {
+  propertyId: string;
+  tenantId: string;
+  page: number;
+  limit: number;
+  type?: string;
+  status?: string;
+}
+
+export interface TenantPaymentsResultDto {
+  payments: PaymentResponseDto[];
+  total: number;
+  page: number;
+  limit: number;
 }

@@ -1,7 +1,7 @@
 import Router from "express";
 import { container } from "tsyringe";
 
-import { TenantVisitController } from "../../controllers/implementation/tenant/tenant.visit.controller";
+import { TenantVisitController } from "../../controllers/tenant/tenant.visit.controller";
 import { asyncHandler } from "../../middleware/asyncHandler";
 import { authenticateToken } from "../../middleware/auth.middleware";
 import { tenantOnly } from "../../middleware/role.middleware";

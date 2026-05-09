@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { injectable, inject } from "tsyringe";
 
+import { MESSAGES } from "../../../common/constants/statusMessages";
 import { DI_TYPES } from "../../../common/di/types";
 import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
@@ -37,7 +38,10 @@ export class tenantProfileService implements ITenantProfileService {
     const tenant = await this._userRepo.findById(userId);
     if (!tenant) {
       logger.warn("Profile edit failed - tenant not found", { userId });
-      throw new AppError("Tenant not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.PROFILE.TENANT_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     let avatarUrl: string | undefined;
@@ -57,7 +61,10 @@ export class tenantProfileService implements ITenantProfileService {
     const updatedTenant = await this._userRepo.update(userId, updateData);
     if (!updatedTenant) {
       logger.warn("Profile edit failed - update returned null", { userId });
-      throw new AppError("Tenant not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.PROFILE.TENANT_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     logger.info("Tenant profile updated successfully", {
@@ -80,7 +87,10 @@ export class tenantProfileService implements ITenantProfileService {
     const tenant = await this._userRepo.findById(userId);
     if (!tenant) {
       logger.warn("Password change failed - tenant not found", { userId });
-      throw new AppError("Tenant not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.PROFILE.TENANT_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     const isCurrentPasswordValid = await bcrypt.compare(
@@ -92,18 +102,21 @@ export class tenantProfileService implements ITenantProfileService {
         userId,
       });
       throw new AppError(
-        "Current password is incorrect",
+        MESSAGES.PROFILE.CURRENT_PASSWORD_INCORRECT,
         HttpStatus.BAD_REQUEST,
       );
     }
 
     if (dto.newPassword !== dto.confirmPassword) {
-      throw new AppError("New passwords do not match", HttpStatus.BAD_REQUEST);
+      throw new AppError(
+        MESSAGES.PROFILE.PASSWORD_MISMATCH,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (dto.newPassword.length < 8) {
       throw new AppError(
-        "New password must be at least 8 characters",
+        MESSAGES.PROFILE.PASSWORD_MIN_LENGTH,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -117,7 +130,10 @@ export class tenantProfileService implements ITenantProfileService {
 
     if (!updatedTenant) {
       logger.warn("Password change failed - update returned null", { userId });
-      throw new AppError("Tenant not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.PROFILE.TENANT_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     logger.info("Password changed successfully", {

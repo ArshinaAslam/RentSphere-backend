@@ -1,7 +1,7 @@
 import Router from "express";
 import { container } from "tsyringe";
 
-import { AdminLandlordController } from "../../controllers/implementation/admin/admin.landlord.controller";
+import { AdminLandlordController } from "../../controllers/admin/admin.landlord.controller";
 import { asyncHandler } from "../../middleware/asyncHandler";
 import { authenticateToken } from "../../middleware/auth.middleware";
 import { adminOnly } from "../../middleware/role.middleware";
@@ -19,7 +19,7 @@ router.get(
 );
 
 router.get(
-  "/landlordList/:id",
+  "/landlordList/:landlordId",
   authenticateToken,
   adminOnly,
   asyncHandler(
@@ -28,7 +28,7 @@ router.get(
 );
 
 router.patch(
-  "/:id/status",
+  "/:landlordId/status",
   authenticateToken,
   adminOnly,
   asyncHandler(
@@ -37,7 +37,7 @@ router.patch(
 );
 
 router.patch(
-  "/approve-landlordKyc/:id",
+  "/approve-landlordKyc/:landlordId",
   authenticateToken,
   adminOnly,
   asyncHandler(
@@ -46,7 +46,7 @@ router.patch(
 );
 
 router.patch(
-  "/reject-landlordKyc/:id",
+  "/reject-landlordKyc/:landlordId",
   authenticateToken,
   adminOnly,
   asyncHandler(

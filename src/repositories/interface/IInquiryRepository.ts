@@ -16,4 +16,12 @@ export interface IInquiryRepository extends IBaseRepository<IInquiry> {
     search: string,
   ): Promise<IInquiry[]>;
   countByLandlordId(landlordId: string, search: string): Promise<number>;
+  findByTenantIdPaginated(
+    tenantId: string,
+    skip: number,
+    limit: number,
+    search: string,
+  ): Promise<IInquiry[]>;
+  countByTenantId(tenantId: string, search: string): Promise<number>;
+  markAsRead(inquiryId: string): Promise<void>;
 }

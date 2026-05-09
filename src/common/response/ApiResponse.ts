@@ -8,4 +8,13 @@ export class ApiResponses<T = unknown> {
     this.message = message;
     this.data = data;
   }
+
+  // ─────────────── Static helpers ───────────────────
+  static success<T>(data: T, message: string = "Success"): ApiResponses<T> {
+    return new ApiResponses(true, message, data);
+  }
+
+  static error(message: string): ApiResponses<null> {
+    return new ApiResponses(false, message, null);
+  }
 }

@@ -1,6 +1,6 @@
 import type { IVisitBooking } from "../models/visitBookingModel";
 
-interface TenantSummary {
+export interface TenantSummary {
   id: string;
   firstName: string;
   lastName: string;
@@ -9,12 +9,15 @@ interface TenantSummary {
   avatar: string;
 }
 
-interface PropertySummary {
+export interface PropertySummary {
   id: string;
   title: string;
   address: string;
   city: string;
   images: string[];
+  price: number;
+  securityDeposit: number;
+  amenities: string[];
 }
 
 interface PopulatedTenant {
@@ -32,6 +35,9 @@ interface PopulatedProperty {
   address: string;
   city: string;
   images: string[];
+  price: number;
+  securityDeposit: number;
+  amenities: string[];
 }
 
 export interface VisitBookingResponseDto {
@@ -77,6 +83,10 @@ export class VisitBookingMapper {
           address: (propertyId as PopulatedProperty).address ?? "",
           city: (propertyId as PopulatedProperty).city ?? "",
           images: (propertyId as PopulatedProperty).images ?? [],
+          price: (propertyId as PopulatedProperty).price ?? 0,
+          securityDeposit:
+            (propertyId as PopulatedProperty).securityDeposit ?? 0,
+          amenities: (propertyId as PopulatedProperty).amenities ?? [],
         }
       : String(propertyId);
 

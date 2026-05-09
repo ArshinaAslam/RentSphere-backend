@@ -4,7 +4,6 @@ export interface GetLandlordDetailsDto {
 
 export interface LandlordListItemDto {
   id: string;
-  //   tenantId: string;
   fullName: string;
   email: string;
   phone: string;
@@ -22,7 +21,6 @@ export interface LandlordListDto {
 
 export interface LandlordDetailsDto {
   id: string;
-  //   landlordId: string;
   fullName: string;
   email: string;
   phone: string;

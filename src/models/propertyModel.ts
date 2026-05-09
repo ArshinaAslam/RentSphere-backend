@@ -5,7 +5,7 @@ import type { Document } from "mongoose";
 export interface IProperty extends Document {
   landlordId: string;
   title: string;
-  type: "Apartment" | "Villa" | "House";
+  type: string;
   bhk: string;
   address: string;
   city: string;
@@ -73,7 +73,6 @@ const PropertySchema: Schema = new Schema(
   },
 );
 
-// Index for fast queries
 PropertySchema.index({ landlordId: 1, status: 1 });
 PropertySchema.index({ city: 1, status: 1 });
 

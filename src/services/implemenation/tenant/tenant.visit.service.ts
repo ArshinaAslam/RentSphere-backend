@@ -10,6 +10,7 @@ import {
 } from "../../../mappers/visitBooking.mapper";
 import { VisitBookingRepository } from "../../../repositories/implementation/visitBooking.repository";
 import logger from "../../../utils/logger";
+import { createAndEmitNotification } from "../../../utils/notificationEmitter";
 
 @injectable()
 export class TenantVisitService {
@@ -80,6 +81,15 @@ export class TenantVisitService {
       propertyId,
       date,
       timeSlot,
+    });
+
+    await createAndEmitNotification({
+      recipientId: landlordId,
+      recipientRole: "landlord",
+      type: "visit_booked",
+      title: "Visit Scheduled",
+      message: `A tenant has scheduled a property visit on ${date} at ${timeSlot}.`,
+      link: "/landlord/visit-requests",
     });
   }
 

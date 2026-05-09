@@ -1,5 +1,6 @@
 import { injectable, inject } from "tsyringe";
 
+import { MESSAGES } from "../../../common/constants/statusMessages";
 import { DI_TYPES } from "../../../common/di/types";
 import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
@@ -18,13 +19,13 @@ import {
 
 function validateAadhaar(number: string): void {
   if (!/^\d{12}$/.test(number)) {
-    throw new AppError("Invalid Aadhaar format", 400);
+    throw new AppError(MESSAGES.KYC.INVALID_AADHAAR, 400);
   }
 }
 
 function validatePan(number: string): void {
   if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i.test(number)) {
-    throw new AppError("Invalid PAN format", 400);
+    throw new AppError(MESSAGES.KYC.INVALID_PAN, 400);
   }
 }
 
@@ -41,10 +42,7 @@ export class LandlordKycService implements ILandlordKycService {
   ): Promise<KycResult> {
     const user = await this._landlordRepo.findByEmail(email);
     if (!user) {
-      throw new AppError(
-        "Landlord not found for this email",
-        HttpStatus.NOT_FOUND,
-      );
+      throw new AppError(MESSAGES.KYC.LANDLORD_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     const userId = String(user._id);
@@ -52,7 +50,7 @@ export class LandlordKycService implements ILandlordKycService {
     const { aadhaarFront, panCard, aadhaarBack, selfie } = dto.files;
 
     if (!aadhaarFront || !panCard) {
-      throw new AppError("Required documents missing", HttpStatus.BAD_REQUEST);
+      throw new AppError(MESSAGES.KYC.REQUIRED_DOCS, HttpStatus.BAD_REQUEST);
     }
 
     const [aadhaarFrontUrl, panCardUrl, aadhaarBackUrl, selfieUrl] =
@@ -84,7 +82,7 @@ export class LandlordKycService implements ILandlordKycService {
     };
 
     const landlord = await this._landlordRepo.updateKyc(userId, dbData);
-    if (!landlord) throw new AppError("Landlord not found", 404);
+    if (!landlord) throw new AppError(MESSAGES.KYC.LANDLORD_NOT_FOUND, 404);
 
     return {
       kycId: String(landlord._id),
@@ -101,10 +99,7 @@ export class LandlordKycService implements ILandlordKycService {
       logger.warn("KYC status failed - landlord not found", {
         email: dto.email,
       });
-      throw new AppError(
-        "Landlord not found for this email",
-        HttpStatus.NOT_FOUND,
-      );
+      throw new AppError(MESSAGES.KYC.LANDLORD_NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     logger.debug("KYC status found", {

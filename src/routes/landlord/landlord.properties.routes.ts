@@ -2,7 +2,7 @@ import Router from "express";
 import { container } from "tsyringe";
 
 import { uploadMultipleImages } from "../../config/multer";
-import { LandlordPropertyController } from "../../controllers/implementation/landlord/landlord.property.controller";
+import { LandlordPropertyController } from "../../controllers/landlord/landlord.property.controller";
 import { asyncHandler } from "../../middleware/asyncHandler";
 import { authenticateToken } from "../../middleware/auth.middleware";
 import { landlordOnly } from "../../middleware/role.middleware";
@@ -62,6 +62,29 @@ router.put(
   authenticateToken,
   landlordOnly,
   landlordPropertyController.editLandlordProperty.bind(
+    landlordPropertyController,
+  ),
+);
+
+router.get(
+  "/:propertyId/leases",
+  authenticateToken,
+  landlordOnly,
+  landlordPropertyController.getPropertyLeases.bind(landlordPropertyController),
+);
+router.get(
+  "/:propertyId/payments",
+  authenticateToken,
+  landlordOnly,
+  landlordPropertyController.getPropertyPayments.bind(
+    landlordPropertyController,
+  ),
+);
+router.get(
+  "/:propertyId/reviews",
+  authenticateToken,
+  landlordOnly,
+  landlordPropertyController.getPropertyReviews.bind(
     landlordPropertyController,
   ),
 );

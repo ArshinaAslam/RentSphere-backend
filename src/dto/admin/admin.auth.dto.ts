@@ -1,8 +1,3 @@
-// export interface AdminLoginDto {
-//   email: string;
-//   password: string;
-// }
-
 import type { AdminResponse } from "../../types/admin.types";
 
 export interface AdminLoginDto {

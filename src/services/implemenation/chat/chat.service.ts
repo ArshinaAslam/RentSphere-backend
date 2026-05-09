@@ -1,5 +1,6 @@
 import { injectable, inject } from "tsyringe";
 
+import { MESSAGES } from "../../../common/constants/statusMessages";
 import { DI_TYPES } from "../../../common/di/types";
 import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
@@ -96,9 +97,11 @@ export class ChatService implements IChatService {
   async sendMessage(dto: SendMessageDto): Promise<MessageResponseDto> {
     const conversation = await this._convRepo.findById(dto.conversationId);
     if (!conversation) {
-      throw new AppError("Conversation not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.CHAT.CONVERSATION_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
-
     const message = await this._msgRepo.createMessage({
       conversationId: dto.conversationId,
       senderId: dto.senderId,
@@ -178,5 +181,15 @@ export class ChatService implements IChatService {
 
     const messages = await this._msgRepo.findCallMessages(convIds);
     return ChatMapper.toMessageDtoList(messages);
+  }
+
+  async uploadAttachment(
+    file: Express.Multer.File,
+    userId: string,
+  ): Promise<{ url: string; originalName: string }> {
+    logger.info("Attachment upload", { userId, filename: file.originalname });
+    const url = await uploadToS3(file, "chat-attachments", userId);
+    logger.info("Attachment uploaded to S3", { userId, url });
+    return { url, originalName: file.originalname };
   }
 }

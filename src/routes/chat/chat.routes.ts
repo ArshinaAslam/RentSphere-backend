@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { container } from "tsyringe";
 
-import { uploadVoice } from "../../config/multer";
-import { ChatController } from "../../controllers/implementation/chat/chat.controller";
+import { uploadAttachment, uploadVoice } from "../../config/multer";
+import { ChatController } from "../../controllers/chat/chat.controller";
 import { asyncHandler } from "../../middleware/asyncHandler";
 import { authenticateToken } from "../../middleware/auth.middleware";
 
@@ -50,6 +50,13 @@ router.get(
   "/call-history",
   authenticateToken,
   asyncHandler(chatController.getCallHistory.bind(chatController)),
+);
+
+router.post(
+  "/upload-attachment",
+  authenticateToken,
+  uploadAttachment.single("file"),
+  asyncHandler(chatController.uploadAttachment.bind(chatController)),
 );
 
 export default router;

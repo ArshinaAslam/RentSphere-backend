@@ -1,5 +1,6 @@
 import { injectable, inject } from "tsyringe";
 
+import { MESSAGES } from "../../../common/constants/statusMessages";
 import { DI_TYPES } from "../../../common/di/types";
 import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
@@ -57,34 +58,40 @@ export class LandlordVisitService implements ILandlordVisitService {
     });
 
     if (!visitId) {
-      throw new AppError("Visit ID is required", HttpStatus.BAD_REQUEST);
+      throw new AppError(
+        MESSAGES.VISIT.VISIT_ID_REQUIRED,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const allowedStatuses = ["confirmed", "cancelled", "completed"];
     if (!allowedStatuses.includes(dto.status)) {
-      throw new AppError("Invalid status value", HttpStatus.BAD_REQUEST);
+      throw new AppError(MESSAGES.VISIT.INVALID_STATUS, HttpStatus.BAD_REQUEST);
     }
 
     const visit = await this._visitRepo.findById(visitId);
 
     if (!visit) {
-      throw new AppError("Visit not found", HttpStatus.NOT_FOUND);
+      throw new AppError(MESSAGES.VISIT.NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
     if (String(visit.landlordId) !== landlordId) {
       throw new AppError(
-        "Unauthorized: This is not your property visit",
+        MESSAGES.VISIT.UNAUTHORIZED_VISIT,
         HttpStatus.FORBIDDEN,
       );
     }
 
     if (visit.status === "cancelled") {
-      throw new AppError("Visit is already cancelled", HttpStatus.BAD_REQUEST);
+      throw new AppError(
+        MESSAGES.VISIT.ALREADY_CANCELLED,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (visit.status === "completed") {
       throw new AppError(
-        "Cannot update a completed visit",
+        MESSAGES.VISIT.ALREADY_COMPLETED_UPDATE,
         HttpStatus.BAD_REQUEST,
       );
     }

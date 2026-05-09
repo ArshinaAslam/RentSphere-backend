@@ -3,7 +3,6 @@ import { injectable, inject } from "tsyringe";
 import { DI_TYPES } from "../../../common/di/types";
 import logger from "../../../utils/logger";
 
-import type { IInquiry } from "../../../models/inquiryModel";
 import type { IInquiryRepository } from "../../../repositories/interface/IInquiryRepository";
 import type {
   ILandlordInquiryService,
@@ -32,7 +31,7 @@ export class LandlordInquiryService implements ILandlordInquiryService {
       search,
     });
 
-    const [inquiries, total]: [IInquiry[], number] = await Promise.all([
+    const [inquiries, total] = await Promise.all([
       this._inquiryRepo.findByLandlordIdPaginated(
         landlordId,
         skip,
@@ -49,5 +48,9 @@ export class LandlordInquiryService implements ILandlordInquiryService {
     });
 
     return { inquiries, total, page, limit };
+  }
+
+  async markAsRead(inquiryId: string): Promise<void> {
+    await this._inquiryRepo.markAsRead(inquiryId);
   }
 }

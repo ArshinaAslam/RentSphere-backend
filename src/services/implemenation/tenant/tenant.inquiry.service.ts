@@ -1,9 +1,11 @@
 import { injectable, inject } from "tsyringe";
 
+import { MESSAGES } from "../../../common/constants/statusMessages";
 import { DI_TYPES } from "../../../common/di/types";
 import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
 import logger from "../../../utils/logger";
+import { createAndEmitNotification } from "../../../utils/notificationEmitter";
 
 import type { CreateInquiryDto } from "../../../dto/tenant/tenant.inquiry.dto";
 import type { IInquiry } from "../../../models/inquiryModel";
@@ -21,15 +23,12 @@ export class TenantInquiryService implements ITenantInquiryService {
     const { propertyId, landlordId, questions, message } = dto;
 
     if (!propertyId || !landlordId) {
-      throw new AppError(
-        "propertyId and landlordId are required",
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new AppError(MESSAGES.INQUIRY.REQUIRED_IDS, HttpStatus.BAD_REQUEST);
     }
 
     if (!questions || questions.length === 0) {
       throw new AppError(
-        "At least one question is required",
+        MESSAGES.INQUIRY.QUESTION_REQUIRED,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -43,5 +42,37 @@ export class TenantInquiryService implements ITenantInquiryService {
     } as Partial<IInquiry>);
 
     logger.info("Inquiry created successfully", { tenantId, propertyId });
+    await createAndEmitNotification({
+      recipientId: landlordId,
+      recipientRole: "landlord",
+      type: "inquiry_received",
+      title: "New Inquiry Received",
+      message: "A tenant has sent an inquiry about your property.",
+      link: "/landlord/enquiries",
+    });
+  }
+
+  async getTenantInquiries(
+    tenantId: string,
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<{
+    inquiries: IInquiry[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
+    const skip = (page - 1) * limit;
+    const [inquiries, total] = await Promise.all([
+      this._inquiryRepo.findByTenantIdPaginated(
+        tenantId,
+        skip,
+        limit,
+        search ?? "",
+      ),
+      this._inquiryRepo.countByTenantId(tenantId, search ?? ""),
+    ]);
+    return { inquiries, total, page, totalPages: Math.ceil(total / limit) };
   }
 }

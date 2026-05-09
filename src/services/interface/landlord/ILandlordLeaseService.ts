@@ -19,7 +19,6 @@ export interface ILandlordLeaseService {
     landlordId: string,
   ): Promise<LeaseResponseDto>;
   sendLease(leaseId: string, landlordId: string): Promise<LeaseResponseDto>;
-  // getLandlordLeases(landlordId: string): Promise<LeaseResponseDto[]>;
   getLandlordLeases(
     landlordId: string,
     page: number,
