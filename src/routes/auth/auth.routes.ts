@@ -1,7 +1,7 @@
 import Router from "express";
 import { container } from "tsyringe";
 
-import { AuthController } from "../../controllers/implementation/auth/auth.controller";
+import { AuthController } from "../../controllers/auth/auth.controller";
 import { asyncHandler } from "../../middleware/asyncHandler";
 import { authenticateToken } from "../../middleware/auth.middleware";
 const router = Router();

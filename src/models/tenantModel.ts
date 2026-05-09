@@ -3,8 +3,6 @@ import { Schema, model } from "mongoose";
 import type { UserRole } from "../types/auth.types";
 import type { Document } from "mongoose";
 
-// export type UserRole = "TENANT" | "LANDLORD" | "ADMIN";
-
 export interface ITenant extends Document {
   firstName: string;
   lastName: string;

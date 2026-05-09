@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { injectable, inject } from "tsyringe";
 
+import { MESSAGES } from "../../../common/constants/statusMessages";
 import { DI_TYPES } from "../../../common/di/types";
 import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
@@ -29,13 +30,13 @@ export class AdminAuthService implements IAdminAuthService {
 
     if (!admin) {
       logger.warn("Admin login failed - admin not found", { email: dto.email });
-      throw new AppError("Invalid Email", HttpStatus.UNAUTHORIZED);
+      throw new AppError(MESSAGES.ADMIN.INVALID_EMAIL, HttpStatus.UNAUTHORIZED);
     }
 
     if (!admin.isActive) {
       logger.warn("Admin login failed - inactive admin", { email: dto.email });
       throw new AppError(
-        "Account is inactive. Contact support.",
+        MESSAGES.ADMIN.ACCOUNT_INACTIVE,
         HttpStatus.UNAUTHORIZED,
       );
     }
@@ -46,7 +47,10 @@ export class AdminAuthService implements IAdminAuthService {
     );
     if (!isValidPassword) {
       logger.warn("Admin login failed - wrong password", { email: dto.email });
-      throw new AppError("Wrong Password", HttpStatus.UNAUTHORIZED);
+      throw new AppError(
+        MESSAGES.ADMIN.WRONG_PASSWORD,
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     const payload = {
@@ -71,31 +75,4 @@ export class AdminAuthService implements IAdminAuthService {
       tokens: { accessToken, refreshToken },
     };
   }
-
-  // async refreshAdminToken(
-  //   refreshToken: string,
-  // ): Promise<{ accessToken: string }> {
-  //   logger.info("Token refresh processing");
-  //   console.log("refresh service1", refreshToken);
-  //   const decoded = jwt.verify(refreshToken, ENV.JWT_REFRESH_SECRET) as {
-  //     userId: string;
-  //     email: string;
-  //     role: string;
-  //   };
-
-  //   logger.debug("Refresh token decoded", { userId: decoded.userId });
-  //   const payload = {
-  //     _id: decoded.userId,
-  //     email: decoded.email,
-  //     role: decoded.role,
-  //   };
-  //   const newAccessToken = jwt.sign(payload, ENV.JWT_ACCESS_SECRET, {
-  //     expiresIn: "15m",
-  //   });
-
-  //   logger.info("Token refresh success", { userId: decoded.userId });
-  //   console.log("refresh service2");
-
-  //   return { accessToken: newAccessToken };
-  // }
 }

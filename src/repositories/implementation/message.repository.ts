@@ -61,21 +61,6 @@ export class MessageRepository
     } as FilterQuery<IMessage>);
   }
 
-  // async findCallMessages(userId: string): Promise<IMessage[]> {
-  //   return this.model
-  //     .find({
-  //       senderId: userId,
-  //       $or: [
-  //         { content: { $regex: /^Voice call/ } },
-  //         { content: { $regex: /^Video call/ } },
-  //       ],
-  //     })
-  //     .sort({ createdAt: -1 })
-  //     .limit(50)
-
-  //     .exec();
-  // }
-
   async findCallMessages(conversationIds: string[]): Promise<IMessage[]> {
     return this.model
       .find({

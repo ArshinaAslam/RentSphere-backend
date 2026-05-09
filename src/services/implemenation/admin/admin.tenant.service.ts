@@ -1,6 +1,7 @@
-import { Types, FilterQuery } from "mongoose";
+import { Types } from "mongoose";
 import { injectable, inject } from "tsyringe";
 
+import { MESSAGES } from "../../../common/constants/statusMessages";
 import { DI_TYPES } from "../../../common/di/types";
 import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
@@ -10,7 +11,6 @@ import {
   ToggleUserStatusDto,
 } from "../../../dto/admin/admin.user.dto";
 import { AdminMapper } from "../../../mappers/admin.mapper";
-import { ITenant } from "../../../models/tenantModel";
 import { ITenantRepository } from "../../../repositories/interface/ITenantRepository";
 import logger from "../../../utils/logger";
 import {
@@ -24,7 +24,7 @@ export const generateUserId = (id: string) => {
 
 export function extractMongoIdFromTenantId(tenantId: string): string {
   if (!tenantId.startsWith("USR-")) {
-    throw new Error("Invalid tenantId format");
+    throw new Error(MESSAGES.ADMIN.INVALID_TENANT_ID_FORMAT);
   }
   return tenantId.slice(4);
 }
@@ -37,50 +37,23 @@ export default class AdminTenantService implements IAdminTenantService {
   ) {}
 
   async getTenants(dto: GetUsersDto): Promise<TenantsListResultDto> {
-    logger.info("Admin fetching tenants", {
-      search: dto.search,
-      page: dto.page ?? 1,
-    });
-
-    const query: FilterQuery<ITenant> = { role: "TENANT" };
-    if (dto.search) {
-      query.$or = [
-        { firstName: { $regex: dto.search, $options: "i" } },
-        { lastName: { $regex: dto.search, $options: "i" } },
-        { email: { $regex: dto.search, $options: "i" } },
-      ];
-    }
-
     const page = dto.page ?? 1;
-    const limit = dto.limit ?? 10;
+    const limit = dto.limit ?? 5;
     const skip = (page - 1) * limit;
 
     const [tenants, total] = await Promise.all([
-      this.tenantRepo
-        .findMany(query)
-        .select("-passwordHash")
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit),
-      this.tenantRepo.count(query),
+      this.tenantRepo.findPaginated(
+        skip,
+        limit,
+        dto.search ?? "",
+        dto.from,
+        dto.to,
+      ),
+      this.tenantRepo.countBySearch(dto.search ?? "", dto.from, dto.to),
     ]);
 
-    // const formattedTenants = tenants.map((tenant) => ({
-    //   id: tenant._id.toString(),
-    //   tenantId: generateUserId(tenant._id.toString()),
-    //   fullName: `${tenant.firstName} ${tenant.lastName}`,
-    //   email: tenant.email,
-    //   phone: tenant.phone ?? "",
-    //   avatar: tenant.avatar,
-    //   status: tenant.isActive ? "active" : "blocked",
-    //   kycStatus: tenant.kycStatus ?? "NOT_SUBMITTED",
-    // }));
-
-    const mappedTenants = tenants.map((t) => AdminMapper.toTenantListItem(t));
-
-    logger.info(`Fetched ${tenants.length} tenants`, { total, page });
     return {
-      users: mappedTenants,
+      users: tenants.map((t) => AdminMapper.toTenantListItem(t)),
       total,
       page,
       totalPages: Math.ceil(total / limit),
@@ -97,7 +70,10 @@ export default class AdminTenantService implements IAdminTenantService {
     });
 
     if (!Types.ObjectId.isValid(id)) {
-      throw new AppError("Invalid user ID", HttpStatus.BAD_REQUEST);
+      throw new AppError(
+        MESSAGES.ADMIN.INVALID_USER_ID,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const updatedUser = await this.tenantRepo.updateUserById(id, {
@@ -106,7 +82,7 @@ export default class AdminTenantService implements IAdminTenantService {
 
     if (!updatedUser) {
       throw new AppError(
-        "Failed to update tenant",
+        MESSAGES.ADMIN.UPDATE_FAILED,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

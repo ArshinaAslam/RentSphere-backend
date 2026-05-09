@@ -2,9 +2,15 @@ import type {
   AddPropertyDto,
   EditPropertyDto,
   GetPropertiesResultDto,
+  GetPropertyLeasesDto,
+  GetPropertyPaymentsDto,
   GetPropertyResultDto,
+  GetPropertyReviewsDto,
   PropertyResultDto,
 } from "../../../dto/landlord/landlord.property.dto";
+import type { ReviewResponseDto } from "../../../dto/tenant/tenant.review.dto";
+import type { LeaseResponseDto } from "../../../mappers/lease.mapper";
+import type { PaymentResponseDto } from "../../../mappers/payment.mapper";
 import type { IProperty } from "../../../models/propertyModel";
 
 export interface PropertyResult {
@@ -44,4 +50,22 @@ export interface ILandlordPropertyService {
     landlordId: string,
     imageFiles: Express.Multer.File[],
   ): Promise<PropertyResultDto>;
+  getPropertyLeases(dto: GetPropertyLeasesDto): Promise<{
+    leases: LeaseResponseDto[];
+    total: number;
+    page: number;
+    limit: number;
+  }>;
+  getPropertyPayments(dto: GetPropertyPaymentsDto): Promise<{
+    payments: PaymentResponseDto[];
+    total: number;
+    page: number;
+    limit: number;
+  }>;
+  getPropertyReviews(dto: GetPropertyReviewsDto): Promise<{
+    reviews: ReviewResponseDto[];
+    total: number;
+    page: number;
+    limit: number;
+  }>;
 }

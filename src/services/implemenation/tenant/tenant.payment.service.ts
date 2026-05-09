@@ -2,12 +2,14 @@ import crypto from "crypto";
 
 import { injectable, inject } from "tsyringe";
 
+import { MESSAGES } from "../../../common/constants/statusMessages";
 import { DI_TYPES } from "../../../common/di/types";
 import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
 import { razorpay, PLATFORM_FEE_PERCENT } from "../../../config/razorPay";
 import { PaymentMapper } from "../../../mappers/payment.mapper";
 import logger from "../../../utils/logger";
+import { createAndEmitNotification } from "../../../utils/notificationEmitter";
 
 import type {
   CreateDepositOrderDto,
@@ -43,17 +45,21 @@ export class TenantPaymentService implements ITenantPaymentService {
     keyId: string;
   }> {
     const lease = await this._leaseRepo.findById(dto.leaseId);
-    if (!lease) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!lease)
+      throw new AppError(
+        MESSAGES.PAYMENT.LEASE_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
 
     const leaseTenantId =
       typeof lease.tenantId === "object" && lease.tenantId !== null
         ? String((lease.tenantId as { _id: string })._id)
         : String(lease.tenantId);
     if (String(leaseTenantId) !== tenantId)
-      throw new AppError("Unauthorized", HttpStatus.FORBIDDEN);
+      throw new AppError(MESSAGES.PAYMENT.UNAUTHORIZED, HttpStatus.FORBIDDEN);
     if (!["signed", "active"].includes(lease.status))
       throw new AppError(
-        "Lease must be signed before paying deposit",
+        MESSAGES.PAYMENT.LEASE_NOT_SIGNED,
         HttpStatus.BAD_REQUEST,
       );
 
@@ -63,7 +69,7 @@ export class TenantPaymentService implements ITenantPaymentService {
     );
     if (depositPaid)
       throw new AppError(
-        "Deposit already paid for this lease",
+        MESSAGES.PAYMENT.DEPOSIT_ALREADY_PAID,
         HttpStatus.BAD_REQUEST,
       );
 
@@ -81,7 +87,6 @@ export class TenantPaymentService implements ITenantPaymentService {
       },
     });
 
-    // ── Save payment record ──
     const payment = await this._paymentRepo.createPayment({
       leaseId: String(lease._id),
       tenantId,
@@ -113,11 +118,10 @@ export class TenantPaymentService implements ITenantPaymentService {
       amount: amount * 100,
       currency: "INR",
       paymentId: String(payment._id),
-      keyId: process.env.RAZORPAY_KEY_ID!,
+      keyId: process.env.RAZORPAY_KEY_ID ?? "",
     };
   }
 
-  // ── Create Rent Order ── (NEW — for monthly rent)
   async createRentOrder(
     dto: { leaseId: string; month: number; year: number },
     tenantId: string,
@@ -129,17 +133,24 @@ export class TenantPaymentService implements ITenantPaymentService {
     keyId: string;
   }> {
     const lease = await this._leaseRepo.findById(dto.leaseId);
-    if (!lease) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!lease)
+      throw new AppError(
+        MESSAGES.PAYMENT.LEASE_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
 
-    if (String(lease.tenantId) !== tenantId)
-      throw new AppError("Unauthorized", HttpStatus.FORBIDDEN);
+    const leaseTenantId =
+      typeof lease.tenantId === "object" && lease.tenantId !== null
+        ? String((lease.tenantId as { _id: string })._id)
+        : String(lease.tenantId);
+    if (String(leaseTenantId) !== tenantId)
+      throw new AppError(MESSAGES.PAYMENT.UNAUTHORIZED, HttpStatus.FORBIDDEN);
     if (lease.status !== "active")
       throw new AppError(
-        "Lease must be active to pay rent",
+        MESSAGES.PAYMENT.LEASE_NOT_ACTIVE,
         HttpStatus.BAD_REQUEST,
       );
 
-    // ── Check if rent already paid for this month ──
     const existingPayments = await this._paymentRepo.findByLeaseId(dto.leaseId);
     const alreadyPaid = existingPayments.some(
       (p) =>
@@ -150,16 +161,51 @@ export class TenantPaymentService implements ITenantPaymentService {
     );
     if (alreadyPaid)
       throw new AppError(
-        "Rent already paid for this month",
+        MESSAGES.PAYMENT.RENT_ALREADY_PAID,
         HttpStatus.BAD_REQUEST,
       );
+    const existingPending = existingPayments.find(
+      (p) =>
+        p.type === "rent" &&
+        p.status === "pending" &&
+        p.month === dto.month &&
+        p.year === dto.year,
+    );
 
-    // ── Calculate split ──
+    if (existingPending) {
+      const order = await razorpay.orders.create({
+        amount: existingPending.amount * 100,
+        currency: "INR",
+        notes: {
+          leaseId: String(lease._id),
+          tenantId,
+          type: "rent",
+          month: String(dto.month),
+          year: String(dto.year),
+        },
+      });
+
+      await this._paymentRepo.updateStatus(
+        String(existingPending._id),
+        "pending",
+        {
+          razorpayOrderId: order.id,
+        },
+      );
+
+      return {
+        orderId: order.id,
+        amount: existingPending.amount * 100,
+        currency: "INR",
+        paymentId: String(existingPending._id),
+        keyId: process.env.RAZORPAY_KEY_ID ?? "",
+      };
+    }
+
     const amount = lease.rentAmount;
-    const platformFee = Math.round(amount * PLATFORM_FEE_PERCENT);
+    const platformFee = Math.round(amount * (PLATFORM_FEE_PERCENT / 100));
     const landlordAmount = amount - platformFee;
 
-    // ── Create Razorpay order ──
     const order = await razorpay.orders.create({
       amount: amount * 100,
       currency: "INR",
@@ -177,8 +223,15 @@ export class TenantPaymentService implements ITenantPaymentService {
     const payment = await this._paymentRepo.createPayment({
       leaseId: String(lease._id),
       tenantId,
-      landlordId: String(lease.landlordId),
-      propertyId: String(lease.propertyId),
+      landlordId:
+        typeof lease.landlordId === "object" && lease.landlordId !== null
+          ? String((lease.landlordId as { _id: string })._id)
+          : String(lease.landlordId),
+
+      propertyId:
+        typeof lease.propertyId === "object" && lease.propertyId !== null
+          ? String((lease.propertyId as { _id: string })._id)
+          : String(lease.propertyId),
       type: "rent",
       amount,
       platformFee,
@@ -195,7 +248,7 @@ export class TenantPaymentService implements ITenantPaymentService {
       amount: amount * 100,
       currency: "INR",
       paymentId: String(payment._id),
-      keyId: process.env.RAZORPAY_KEY_ID!,
+      keyId: process.env.RAZORPAY_KEY_ID ?? "",
     };
   }
 
@@ -204,20 +257,30 @@ export class TenantPaymentService implements ITenantPaymentService {
     tenantId: string,
   ): Promise<PaymentResponseDto> {
     const payment = await this._paymentRepo.findById(dto.paymentId);
-    if (!payment) throw new AppError("Payment not found", HttpStatus.NOT_FOUND);
+    if (!payment)
+      throw new AppError(MESSAGES.PAYMENT.NOT_FOUND, HttpStatus.NOT_FOUND);
     if (String(payment.tenantId) !== tenantId)
-      throw new AppError("Unauthorized", HttpStatus.FORBIDDEN);
+      throw new AppError(MESSAGES.PAYMENT.UNAUTHORIZED, HttpStatus.FORBIDDEN);
 
-    // ── Verify Razorpay signature ──
     const body = `${dto.razorpayOrderId}|${dto.razorpayPaymentId}`;
+    const razorpaySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (!razorpaySecret) {
+      throw new AppError(
+        MESSAGES.PAYMENT.RAZORPAY_SECRET_MISSING,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
     const expected = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+      .createHmac("sha256", razorpaySecret)
       .update(body)
       .digest("hex");
 
     if (expected !== dto.razorpaySignature) {
       await this._paymentRepo.updateStatus(dto.paymentId, "failed");
-      throw new AppError("Invalid payment signature", HttpStatus.BAD_REQUEST);
+      throw new AppError(
+        MESSAGES.PAYMENT.INVALID_SIGNATURE,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const updated = await this._paymentRepo.updateStatus(
@@ -230,7 +293,8 @@ export class TenantPaymentService implements ITenantPaymentService {
       },
     );
 
-    if (!updated) throw new AppError("Payment not found", HttpStatus.NOT_FOUND);
+    if (!updated)
+      throw new AppError(MESSAGES.PAYMENT.NOT_FOUND, HttpStatus.NOT_FOUND);
 
     logger.info("Payment completed", {
       paymentId: dto.paymentId,
@@ -238,15 +302,35 @@ export class TenantPaymentService implements ITenantPaymentService {
       amount: payment.amount,
     });
 
+    const landlordId =
+      typeof payment.landlordId === "object" && payment.landlordId !== null
+        ? String((payment.landlordId as { _id: string })._id)
+        : String(payment.landlordId);
+
+    if (updated.type === "deposit") {
+      await createAndEmitNotification({
+        recipientId: landlordId,
+        recipientRole: "landlord",
+        type: "deposit_paid",
+        title: "Security Deposit Received",
+        message: `Security deposit of ₹${updated.amount.toLocaleString("en-IN")} has been received.`,
+        link: "/landlord/payments",
+      });
+    }
+
+    if (updated.type === "rent") {
+      await createAndEmitNotification({
+        recipientId: landlordId,
+        recipientRole: "landlord",
+        type: "rent_paid",
+        title: "Rent Payment Received",
+        message: `Rent payment of ₹${updated.amount.toLocaleString("en-IN")} has been received.`,
+        link: "/landlord/payments",
+      });
+    }
+
     return PaymentMapper.toDto(updated);
   }
-
-  // async getTenantPayments(tenantId: string): Promise<PaymentResponseDto[]> {
-  //   const payments = await this._paymentRepo.findByTenantId(tenantId);
-  //   return PaymentMapper.toDtoList(payments);
-  // }
-
-  // services/implementation/tenant/tenant.payment.service.ts  — update getTenantPayments
 
   async getTenantPayments(
     tenantId: string,
@@ -279,9 +363,13 @@ export class TenantPaymentService implements ITenantPaymentService {
     tenantId: string,
   ): Promise<PaymentResponseDto[]> {
     const lease = await this._leaseRepo.findById(leaseId);
-    if (!lease) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!lease)
+      throw new AppError(
+        MESSAGES.PAYMENT.LEASE_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     if (String(lease.tenantId) !== tenantId)
-      throw new AppError("Unauthorized", HttpStatus.FORBIDDEN);
+      throw new AppError(MESSAGES.PAYMENT.UNAUTHORIZED, HttpStatus.FORBIDDEN);
 
     const payments = await this._paymentRepo.findByLeaseId(leaseId);
     return PaymentMapper.toDtoList(payments);

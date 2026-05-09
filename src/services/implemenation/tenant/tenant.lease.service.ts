@@ -1,10 +1,12 @@
 import { injectable, inject } from "tsyringe";
 
+import { MESSAGES } from "../../../common/constants/statusMessages";
 import { DI_TYPES } from "../../../common/di/types";
 import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
 import { LeaseMapper } from "../../../mappers/lease.mapper";
 import logger from "../../../utils/logger";
+import { createAndEmitNotification } from "../../../utils/notificationEmitter";
 
 import type { SignLeaseDto } from "../../../dto/tenant/tenant.lease.dto";
 import type { LeaseResponseDto } from "../../../mappers/lease.mapper";
@@ -28,7 +30,8 @@ export class TenantLeaseService implements ITenantLeaseService {
     tenantId: string,
   ): Promise<LeaseResponseDto> {
     const lease = await this._leaseRepo.findById(leaseId);
-    if (!lease) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!lease)
+      throw new AppError(MESSAGES.LEASE.NOT_FOUND, HttpStatus.NOT_FOUND);
 
     const leaseTenantId =
       typeof lease.tenantId === "object" &&
@@ -38,7 +41,7 @@ export class TenantLeaseService implements ITenantLeaseService {
         : String(lease.landlordId);
 
     if (leaseTenantId !== tenantId)
-      throw new AppError("Unauthorized", HttpStatus.FORBIDDEN);
+      throw new AppError(MESSAGES.LEASE.UNAUTHORIZED, HttpStatus.FORBIDDEN);
     return LeaseMapper.toDto(lease);
   }
 
@@ -47,7 +50,8 @@ export class TenantLeaseService implements ITenantLeaseService {
     tenantId: string,
   ): Promise<LeaseResponseDto> {
     const lease = await this._leaseRepo.findById(leaseId);
-    if (!lease) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!lease)
+      throw new AppError(MESSAGES.LEASE.NOT_FOUND, HttpStatus.NOT_FOUND);
 
     const leaseTenantId =
       typeof lease.tenantId === "object" &&
@@ -57,13 +61,14 @@ export class TenantLeaseService implements ITenantLeaseService {
         : String(lease.landlordId);
 
     if (leaseTenantId !== tenantId)
-      throw new AppError("Unauthorized", HttpStatus.FORBIDDEN);
+      throw new AppError(MESSAGES.LEASE.UNAUTHORIZED, HttpStatus.FORBIDDEN);
 
     if (lease.status === "sent") {
       const updated = await this._leaseRepo.updateStatus(leaseId, "viewed", {
         viewedAt: new Date(),
       });
-      if (!updated) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+      if (!updated)
+        throw new AppError(MESSAGES.LEASE.NOT_FOUND, HttpStatus.NOT_FOUND);
       return LeaseMapper.toDto(updated);
     }
 
@@ -76,7 +81,8 @@ export class TenantLeaseService implements ITenantLeaseService {
     dto: SignLeaseDto,
   ): Promise<LeaseResponseDto> {
     const lease = await this._leaseRepo.findById(leaseId);
-    if (!lease) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!lease)
+      throw new AppError(MESSAGES.LEASE.NOT_FOUND, HttpStatus.NOT_FOUND);
 
     const leaseTenantId =
       typeof lease.tenantId === "object" &&
@@ -86,10 +92,10 @@ export class TenantLeaseService implements ITenantLeaseService {
         : String(lease.landlordId);
 
     if (leaseTenantId !== tenantId)
-      throw new AppError("Unauthorized", HttpStatus.FORBIDDEN);
+      throw new AppError(MESSAGES.LEASE.UNAUTHORIZED, HttpStatus.FORBIDDEN);
     if (!["sent", "viewed"].includes(lease.status))
       throw new AppError(
-        "Lease cannot be signed in its current status",
+        MESSAGES.LEASE.INVALID_STATUS_SIGN,
         HttpStatus.BAD_REQUEST,
       );
 
@@ -101,8 +107,32 @@ export class TenantLeaseService implements ITenantLeaseService {
       signedAt: new Date(),
     });
 
-    if (!updated) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!updated)
+      throw new AppError(MESSAGES.LEASE.NOT_FOUND, HttpStatus.NOT_FOUND);
     logger.info("Lease signed by tenant", { leaseId, tenantId });
+    const landlordId =
+      typeof lease.landlordId === "object" && lease.landlordId !== null
+        ? String((lease.landlordId as { _id: string })._id)
+        : String(lease.landlordId);
+
+    await createAndEmitNotification({
+      recipientId: landlordId,
+      recipientRole: "landlord",
+      type: "lease_signed",
+      title: "Tenant Signed the Lease",
+      message:
+        "Your tenant has signed the lease agreement. Please review and counter-sign.",
+      link: `/landlord/leases/${leaseId}`,
+    });
+
+    await createAndEmitNotification({
+      recipientId: tenantId,
+      recipientRole: "tenant",
+      type: "lease_signed",
+      title: "Security Deposit Payment Required",
+      message: `You have signed the lease. Please pay your security deposit of ₹${lease.securityDeposit.toLocaleString("en-IN")} to proceed.`,
+      link: "/tenant/payments",
+    });
     return LeaseMapper.toDto(updated);
   }
 }

@@ -19,12 +19,6 @@ export interface PropertyResponseDto {
   amenities: string[];
   images: string[];
   landlordId?: string | object;
-  // coordinates?:
-  //   | {
-  //       lat: number;
-  //       lng: number;
-  //     }
-  //   | undefined;
 }
 
 export interface AddPropertyDto {
@@ -97,4 +91,28 @@ export interface GetPropertiesResultDto {
 
 export interface GetPropertyResultDto {
   property: PropertyResponseDto;
+}
+
+export interface GetPropertyLeasesDto {
+  propertyId: string;
+  landlordId: string;
+  page: number;
+  limit: number;
+  status?: string;
+}
+
+export interface GetPropertyPaymentsDto {
+  propertyId: string;
+  landlordId: string;
+  page: number;
+  limit: number;
+  type?: string;
+  status?: string;
+}
+
+export interface GetPropertyReviewsDto {
+  propertyId: string;
+  landlordId: string;
+  page: number;
+  limit: number;
 }

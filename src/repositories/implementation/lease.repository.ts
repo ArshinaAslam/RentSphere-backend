@@ -1,3 +1,4 @@
+import { FilterQuery } from "mongoose";
 import { injectable } from "tsyringe";
 
 import { BaseRepository } from "../../common/repository/BaseRepository";
@@ -35,15 +36,14 @@ export class LeaseRepository
 
   async findByTenantId(tenantId: string): Promise<ILease[]> {
     return this.model
-      .find({ tenantId })
-      .populate("propertyId", "title address images")
+      .find({ tenantId, status: { $ne: "draft" } })
+      .populate(
+        "propertyId",
+        "title address city state images bedrooms bathrooms area furnishing",
+      )
       .populate("landlordId", "firstName lastName email avatar")
       .sort({ createdAt: -1 })
       .exec();
-  }
-
-  async findByPropertyId(propertyId: string): Promise<ILease[]> {
-    return this.model.find({ propertyId }).sort({ createdAt: -1 }).exec();
   }
 
   async updateLease(id: string, data: Partial<ILease>): Promise<ILease | null> {
@@ -62,6 +62,10 @@ export class LeaseRepository
 
   async deleteLease(id: string): Promise<void> {
     await this.model.findByIdAndDelete(id).exec();
+  }
+
+  find(filter: FilterQuery<ILease>): Promise<ILease[]> {
+    return this.find(filter);
   }
 
   async findLeaseByLandlordId(
@@ -98,5 +102,27 @@ export class LeaseRepository
         { leaseType: { $regex: q, $options: "i" } },
       ],
     };
+  }
+
+  async findByPropertyId(
+    propertyId: string,
+    page: number,
+    limit: number,
+    status?: string,
+  ): Promise<{ data: ILease[]; total: number }> {
+    const query: Record<string, unknown> = { propertyId };
+    if (status) query.status = status;
+
+    const [data, total] = await Promise.all([
+      this.model
+        .find(query)
+        .populate("tenantId", "firstName lastName email phone avatar")
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .exec(),
+      this.model.countDocuments(query).exec(),
+    ]);
+    return { data, total };
   }
 }

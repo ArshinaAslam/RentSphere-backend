@@ -2,7 +2,7 @@ import Router from "express";
 import { container } from "tsyringe";
 
 import { uploadKycImages } from "../../config/multer";
-import { LandlordKycController } from "../../controllers/implementation/landlord/landlord.kyc.controller";
+import { LandlordKycController } from "../../controllers/landlord/landlord.kyc.controller";
 import { asyncHandler } from "../../middleware/asyncHandler";
 const router = Router();
 

@@ -25,6 +25,7 @@ export interface ILease extends Document {
   rentAmount: number;
   securityDeposit: number;
   paymentDueDay: number;
+  gracePeriodDays: number;
   lateFee: number;
   startDate: Date;
   endDate: Date;
@@ -87,6 +88,12 @@ const LeaseSchema = new Schema(
       max: 31,
       default: 1,
     },
+    gracePeriodDays: {
+      type: Number,
+      default: 5,
+      min: 0,
+      max: 15,
+    },
     lateFee: {
       type: Number,
       default: 0,
@@ -127,7 +134,6 @@ const LeaseSchema = new Schema(
     utilitiesIncluded: {
       type: [String],
       default: [],
-      enum: ["electricity", "water", "wifi", "gas", "maintenance"],
     },
     termsAndConditions: {
       type: String,

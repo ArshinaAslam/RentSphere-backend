@@ -39,6 +39,16 @@ interface ServerToClientEvents {
   "call:ice-candidate": (data: { candidate: RTCIceCandidateInit }) => void;
   "call:ended": () => void;
   "call:rejected": () => void;
+
+  "notification:new": (notification: {
+    _id: string;
+    type: string;
+    title: string;
+    message: string;
+    isRead: boolean;
+    link?: string;
+    createdAt: Date;
+  }) => void;
 }
 
 interface ClientToServerEvents {
@@ -330,3 +340,5 @@ export const getIO = (): SocketServer => {
 
 export const isUserOnline = (userId: string): boolean =>
   onlineUsers.has(userId);
+
+export const getOnlineUsers = (): Map<string, string> => onlineUsers;

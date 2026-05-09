@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { injectable } from "tsyringe";
 
 import { BaseRepository } from "../../common/repository/BaseRepository";
@@ -48,12 +48,14 @@ export class InquiryRepository
             ],
           })
           .select("_id")
+          .lean<{ _id: Types.ObjectId }[]>()
           .exec(),
 
         mongoose
           .model("Property")
           .find({ title: { $regex: search, $options: "i" } })
           .select("_id")
+          .lean<{ _id: Types.ObjectId }[]>()
           .exec(),
       ]);
 
@@ -79,7 +81,10 @@ export class InquiryRepository
 
     return this.model
       .find(query)
-      .populate("propertyId", "title address city images")
+      .populate(
+        "propertyId",
+        "title address city images securityDeposit price amenities",
+      )
       .populate("tenantId", "firstName lastName email phone avatar")
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -90,5 +95,76 @@ export class InquiryRepository
   async countByLandlordId(landlordId: string, search: string): Promise<number> {
     const query = await this.buildSearchQuery(landlordId, search);
     return this.model.countDocuments(query).exec();
+  }
+
+  async buildTenantSearchQuery(
+    tenantId: string,
+    search: string,
+  ): Promise<FilterQuery<IInquiry>> {
+    const query: FilterQuery<IInquiry> = { tenantId };
+
+    if (search) {
+      const [matchingLandlords, matchingProperties] = await Promise.all([
+        mongoose
+          .model("Landlord")
+          .find({
+            $or: [
+              { firstName: { $regex: search, $options: "i" } },
+              { lastName: { $regex: search, $options: "i" } },
+            ],
+          })
+          .select("_id")
+          .lean<{ _id: Types.ObjectId }[]>()
+          .exec(),
+
+        mongoose
+          .model("Property")
+          .find({
+            $or: [
+              { title: { $regex: search, $options: "i" } },
+              { city: { $regex: search, $options: "i" } },
+            ],
+          })
+          .select("_id")
+          .lean<{ _id: Types.ObjectId }[]>()
+          .exec(),
+      ]);
+
+      query.$or = [
+        { landlordId: { $in: matchingLandlords.map((l) => l._id) } },
+        { propertyId: { $in: matchingProperties.map((p) => p._id) } },
+      ];
+    }
+
+    return query;
+  }
+
+  async findByTenantIdPaginated(
+    tenantId: string,
+    skip: number,
+    limit: number,
+    search: string,
+  ): Promise<IInquiry[]> {
+    const query = await this.buildTenantSearchQuery(tenantId, search);
+
+    return this.model
+      .find(query)
+      .populate("propertyId", "title address city images")
+      .populate("landlordId", "firstName lastName email phone avatar")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
+  }
+
+  async countByTenantId(tenantId: string, search: string): Promise<number> {
+    const query = await this.buildTenantSearchQuery(tenantId, search);
+    return this.model.countDocuments(query).exec();
+  }
+
+  async markAsRead(inquiryId: string): Promise<void> {
+    await this.model
+      .findByIdAndUpdate(inquiryId, { status: "read" }, { new: true })
+      .exec();
   }
 }

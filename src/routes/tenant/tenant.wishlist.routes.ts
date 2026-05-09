@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { container } from "tsyringe";
 
-import { TenantWishlistController } from "../../controllers/implementation/tenant/tenant.wishlist.controller";
+import { TenantWishlistController } from "../../controllers/tenant/tenant.wishlist.controller";
 import { authenticateToken } from "../../middleware/auth.middleware";
 import { tenantOnly } from "../../middleware/role.middleware";
 

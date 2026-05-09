@@ -10,10 +10,10 @@ export interface IPropertyRepository extends IBaseRepository<IProperty> {
     search?: string,
   ): Promise<IProperty[]>;
   countByLandlordId(landlordId: string, search?: string): Promise<number>;
-  findPropertyById(id: string): Promise<IProperty | null>;
-  deletePropertyById(id: string): Promise<void>;
+  findPropertyById(propertyId: string): Promise<IProperty | null>;
+  deletePropertyById(propertyId: string): Promise<void>;
   updateProperty(
-    id: string,
+    propertyId: string,
     updateData: Partial<IProperty>,
   ): Promise<IProperty | null>;
 
@@ -35,6 +35,14 @@ export interface IPropertyRepository extends IBaseRepository<IProperty> {
     maxPrice?: number;
   }): Promise<number>;
 
-  findTenantPropertyById(id: string): Promise<IProperty | null>;
+  findTenantPropertyById(propertyId: string): Promise<IProperty | null>;
   findAllPropertyByLandlordId(landlordId: string): Promise<IProperty[]>;
+  findAllForAdmin(params: {
+    skip: number;
+    limit: number;
+    from?: string;
+    to?: string;
+  }): Promise<IProperty[]>;
+
+  countAllForAdmin(params: { from?: string; to?: string }): Promise<number>;
 }

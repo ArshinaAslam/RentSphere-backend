@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { inject, injectable } from "tsyringe";
 
+import { MESSAGES } from "../../../common/constants/statusMessages";
 import { DI_TYPES } from "../../../common/di/types";
 import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
@@ -45,7 +46,10 @@ export class LandlordProfileService implements ILandlordProfileService {
     const landlord = await this._landlordRepo.findById(userId);
     if (!landlord) {
       logger.warn("Profile edit failed - landlord not found", { userId });
-      throw new AppError("Landlord not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.PROFILE.LANDLORD_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     let avatarUrl: string | undefined;
@@ -65,7 +69,10 @@ export class LandlordProfileService implements ILandlordProfileService {
     const updatedLandlord = await this._landlordRepo.update(userId, updateData);
     if (!updatedLandlord) {
       logger.warn("Profile edit failed - update returned null", { userId });
-      throw new AppError("Landlord not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.PROFILE.LANDLORD_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     logger.info("Landlord profile updated successfully", {
@@ -88,7 +95,10 @@ export class LandlordProfileService implements ILandlordProfileService {
     const landlord = await this._landlordRepo.findById(userId);
     if (!landlord) {
       logger.warn("Password change failed - landlord not found", { userId });
-      throw new AppError("Landlord not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.PROFILE.LANDLORD_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     const isCurrentPasswordValid = await bcrypt.compare(
@@ -100,18 +110,21 @@ export class LandlordProfileService implements ILandlordProfileService {
         userId,
       });
       throw new AppError(
-        "Current password is incorrect",
+        MESSAGES.PROFILE.CURRENT_PASSWORD_INCORRECT,
         HttpStatus.BAD_REQUEST,
       );
     }
 
     if (dto.newPassword !== dto.confirmPassword) {
-      throw new AppError("New passwords do not match", HttpStatus.BAD_REQUEST);
+      throw new AppError(
+        MESSAGES.PROFILE.PASSWORD_MISMATCH,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (dto.newPassword.length < 8) {
       throw new AppError(
-        "New password must be at least 8 characters",
+        MESSAGES.PROFILE.PASSWORD_MIN_LENGTH,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -125,7 +138,10 @@ export class LandlordProfileService implements ILandlordProfileService {
 
     if (!updatedLandlord) {
       logger.warn("Password change failed - update returned null", { userId });
-      throw new AppError("Landlord not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.PROFILE.LANDLORD_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     logger.info("Password changed successfully", {

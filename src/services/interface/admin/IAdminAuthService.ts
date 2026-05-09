@@ -5,5 +5,4 @@ import type {
 
 export interface IAdminAuthService {
   adminLogin(dto: AdminLoginDto): Promise<AdminResponseDto>;
-  // refreshAdminToken(refreshToken: string): Promise<{ accessToken: string }>;
 }

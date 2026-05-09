@@ -51,6 +51,7 @@ export interface LandlordPropertyDto {
   images: string[];
   price: number;
   status: string;
+  amenities?: string[];
 }
 
 export interface GetLeasesResultDto {

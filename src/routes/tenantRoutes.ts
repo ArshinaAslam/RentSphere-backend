@@ -5,6 +5,7 @@ import tenantLeaseRoutes from "../routes/tenant/tenant.lease.routes";
 import paymentRoutes from "../routes/tenant/tenant.payment.routes";
 import profileRoutes from "../routes/tenant/tenant.profile.routes";
 import propertyRoutes from "../routes/tenant/tenant.property.routes";
+import reviewRoutes from "../routes/tenant/tenant.review.routes";
 import visitRoutes from "../routes/tenant/tenant.visit.routes";
 import wishlistRoutes from "../routes/tenant/tenant.wishlist.routes";
 
@@ -17,5 +18,6 @@ tenantRouter.use("/inquiry", inquiryRoutes);
 tenantRouter.use("/wishlist", wishlistRoutes);
 tenantRouter.use("/leases", tenantLeaseRoutes);
 tenantRouter.use("/payments", paymentRoutes);
+tenantRouter.use("/reviews", reviewRoutes);
 
 export default tenantRouter;

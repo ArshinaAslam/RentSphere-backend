@@ -18,6 +18,8 @@ export const DI_TYPES = {
   TenantPaymentService: Symbol.for("TenantPaymentService"),
   PaymentRepository: Symbol.for("PaymentRepository"),
   LandlordPaymentService: Symbol.for("LandlordPaymentService"),
+  ReviewRepository: Symbol.for("ReviewRepository"),
+  TenantReviewService: Symbol.for("TenantReviewService"),
 
   LandlordRepository: Symbol("LandlordRepository"),
   LandlordAuthService: Symbol("LandlordAuthService"),
@@ -33,6 +35,8 @@ export const DI_TYPES = {
   LandlordVisitController: Symbol("LandlordVisitController"),
   LandlordInquiryService: Symbol("LandlordInquiryService"),
   LandlordLeaseService: Symbol.for("LandlordLeaseService"),
+  LandlordPropertyTypeService: Symbol("LandlordPropertyTypeService"),
+  LandlordAmenityService: Symbol("LandlordAmenityService"),
 
   AdminRepository: Symbol("AdminRepository"),
   AdminAuthService: Symbol("AdminAuthService"),
@@ -41,6 +45,12 @@ export const DI_TYPES = {
   AdminAuthController: Symbol("AdminAuthController"),
   AdminTenantController: Symbol("AdminTenantController"),
   AdminLandlordController: Symbol("AdminLandlordController"),
+  PropertyTypeRepository: Symbol.for("PropertyTypeRepository"),
+  AmenityRepository: Symbol.for("AmenityRepository"),
+  AdminPropertyTypeService: Symbol.for("AdminPropertyTypeService"),
+  AdminAmenityService: Symbol.for("AdminAmenityService"),
+  AdminRevenueService: Symbol("AdminRevenueService"),
+  AdminPropertyService: Symbol.for("AdminPropertyService"),
 
   RedisService: Symbol("RedisService"),
   EmailService: Symbol("EmailService"),
@@ -49,4 +59,6 @@ export const DI_TYPES = {
   ConversationRepository: Symbol.for("ConversationRepository"),
   MessageRepository: Symbol.for("MessageRepository"),
   ChatService: Symbol.for("ChatService"),
+  NotificationService: Symbol.for("NotificationService"),
+  NotificationRepository: Symbol.for("NotificationRepository"),
 } as const;

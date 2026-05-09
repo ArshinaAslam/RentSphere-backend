@@ -76,7 +76,10 @@ export class VisitBookingRepository
     const query = this._buildQuery(landlordId, search);
     return this.model
       .find(query)
-      .populate("propertyId", "title address city images")
+      .populate(
+        "propertyId",
+        "title address city images price securityDeposit amenities",
+      )
       .populate("tenantId", "firstName lastName email phone avatar")
       .sort({ createdAt: -1 })
       .skip(skip)

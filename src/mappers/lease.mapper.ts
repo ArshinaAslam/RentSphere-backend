@@ -15,12 +15,17 @@ interface PopulatedParty {
 }
 
 interface PopulatedProperty {
-  _id: unknown;
+  _id: string;
   title?: string;
   address?: string;
   city?: string;
   state?: string;
   images?: string[];
+  bedrooms?: number;
+  bathrooms?: number;
+  area?: number;
+  furnishing?: string;
+  amenities?: string[];
 }
 
 const isPopulatedParty = (val: unknown): val is PopulatedParty =>
@@ -31,16 +36,7 @@ const isPopulatedProperty = (val: unknown): val is PopulatedProperty =>
 
 export interface LeaseResponseDto {
   _id: string;
-  propertyId:
-    | string
-    | {
-        _id: string;
-        title: string;
-        address: string;
-        city: string;
-        state: string;
-        images: string[];
-      };
+  propertyId: string | PopulatedProperty;
   landlordId:
     | string
     | {
@@ -109,6 +105,10 @@ export class LeaseMapper {
           city: val.city ?? "",
           state: val.state ?? "",
           images: val.images ?? [],
+          ...(val.bedrooms !== undefined && { bedrooms: val.bedrooms }),
+          ...(val.bathrooms !== undefined && { bathrooms: val.bathrooms }),
+          ...(val.area !== undefined && { area: val.area }),
+          ...(val.furnishing !== undefined && { furnishing: val.furnishing }),
         };
       }
       return String(val);
@@ -188,6 +188,7 @@ export class LandlordPropertyMapper {
       images: property.images ?? [],
       price: property.price,
       status: property.status,
+      amenities: property.amenities,
     };
   }
 

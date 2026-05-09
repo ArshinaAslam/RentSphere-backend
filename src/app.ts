@@ -7,6 +7,7 @@ import adminRoutes from "./routes/adminRoutes";
 import authRoutes from "./routes/auth/auth.routes";
 import chatRoutes from "./routes/chat/chat.routes";
 import landlordRoutes from "./routes/landlordRoutes";
+import notificationRoutes from "./routes/notification/notification.routes";
 import tenantRoutes from "./routes/tenantRoutes";
 
 const app = express();
@@ -28,6 +29,7 @@ app.use("/api/landlord", landlordRoutes);
 app.use("/api/tenant", tenantRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use(globalErrorHandler);
 

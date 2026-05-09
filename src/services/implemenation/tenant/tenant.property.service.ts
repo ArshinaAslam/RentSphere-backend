@@ -1,12 +1,19 @@
 import { injectable, inject } from "tsyringe";
 
+import { MESSAGES } from "../../../common/constants/statusMessages";
 import { DI_TYPES } from "../../../common/di/types";
 import { GetAllPropertiesDto } from "../../../dto/landlord/landlord.property.dto";
+import {
+  GetTenantPropertyPaymentsDto,
+  TenantPaymentsResultDto,
+} from "../../../dto/tenant/tenant.payment.dto";
 import {
   GetAllPropertiesResultDto,
   PropertyDetailDto,
 } from "../../../dto/tenant/tenant.property.dto";
+import { PaymentMapper } from "../../../mappers/payment.mapper";
 import { PropertyMapper } from "../../../mappers/property.mapper";
+import { IPaymentRepository } from "../../../repositories/interface/IPaymentRepository";
 import { IPropertyRepository } from "../../../repositories/interface/IPropertyRepository";
 import logger from "../../../utils/logger";
 import {
@@ -19,6 +26,8 @@ export class TenantPropertyService implements ITenantPropertyService {
   constructor(
     @inject(DI_TYPES.PropertyRepository)
     private readonly _propertyRepo: IPropertyRepository,
+    @inject(DI_TYPES.PaymentRepository)
+    private readonly _paymentRepo: IPaymentRepository,
   ) {}
 
   async getAllProperties(
@@ -26,7 +35,7 @@ export class TenantPropertyService implements ITenantPropertyService {
   ): Promise<GetAllPropertiesResultDto> {
     const { page, limit, search, bhk, type, minPrice, maxPrice } = params;
     const pageNum = Number(page) || 1;
-    const limitNum = Number(limit) || 3;
+    const limitNum = Number(limit) || 6;
     const skip = (pageNum - 1) * limitNum;
 
     const queryParams: PropertyQueryParams = {};
@@ -56,21 +65,41 @@ export class TenantPropertyService implements ITenantPropertyService {
     };
   }
 
-  async getPropertyById(id: string): Promise<PropertyDetailDto> {
-    logger.info("Fetching single property by ID", { propertyId: id });
+  async getPropertyById(propertyId: string): Promise<PropertyDetailDto> {
+    logger.info("Fetching single property by ID", { propertyId: propertyId });
 
-    const property = await this._propertyRepo.findTenantPropertyById(id);
+    const property =
+      await this._propertyRepo.findTenantPropertyById(propertyId);
 
     if (!property) {
-      logger.warn("Property not found", { propertyId: id });
-      throw new Error("Property not found");
+      logger.warn("Property not found", { propertyId: propertyId });
+      throw new Error(MESSAGES.PROPERTY.PROPERTY_NOT_FOUND);
     }
 
-    logger.info("Property fetched successfully", { propertyId: id });
+    logger.info("Property fetched successfully", { propertyId: propertyId });
     const mappedProperty = PropertyMapper.toResponseDto(property);
 
     return {
       property: mappedProperty,
+    };
+  }
+
+  async getPropertyPayments(
+    dto: GetTenantPropertyPaymentsDto,
+  ): Promise<TenantPaymentsResultDto> {
+    const { data, total } = await this._paymentRepo.findByPropertyAndTenant(
+      dto.propertyId,
+      dto.tenantId,
+      dto.page,
+      dto.limit,
+      dto.type,
+      dto.status,
+    );
+    return {
+      payments: PaymentMapper.toDtoList(data),
+      total,
+      page: dto.page,
+      limit: dto.limit,
     };
   }
 }

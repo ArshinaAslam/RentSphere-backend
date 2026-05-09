@@ -34,6 +34,7 @@ export interface PropertyResponseDto {
         lng: number;
       }
     | undefined;
+  createdAt?: string;
 }
 
 export interface GetAllPropertiesResultDto {

@@ -19,4 +19,12 @@ export interface ILandlordRepository extends IBaseRepository<ILandlord> {
     id: string,
     updateData: Partial<ILandlord>,
   ): Promise<ILandlord | null>;
+  findPaginated(
+    skip: number,
+    limit: number,
+    search?: string,
+    from?: string,
+    to?: string,
+  ): Promise<ILandlord[]>;
+  countByFilter(search?: string, from?: string, to?: string): Promise<number>;
 }

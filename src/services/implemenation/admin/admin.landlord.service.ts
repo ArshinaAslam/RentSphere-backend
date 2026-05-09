@@ -1,6 +1,7 @@
-import { Types, FilterQuery } from "mongoose";
+import { Types } from "mongoose";
 import { injectable, inject } from "tsyringe";
 
+import { MESSAGES } from "../../../common/constants/statusMessages";
 import { DI_TYPES } from "../../../common/di/types";
 import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
@@ -13,7 +14,6 @@ import {
   ToggleUserStatusDto,
 } from "../../../dto/admin/admin.user.dto";
 import { AdminMapper } from "../../../mappers/admin.mapper";
-import { ILandlord } from "../../../models/landlordModel";
 import { ILandlordRepository } from "../../../repositories/interface/ILandlordRepository";
 import logger from "../../../utils/logger";
 import {
@@ -21,13 +21,13 @@ import {
   LandlordStatusResult,
 } from "../../interface/admin/IAdminLandlordService";
 
-export const generateUserId = (id: string) => {
-  return `USR-${id.slice(-4).padStart(4, "0")}`;
+export const generateUserId = (landlordId: string) => {
+  return `USR-${landlordId.slice(-4).padStart(4, "0")}`;
 };
 
 export function extractMongoIdFromTenantId(tenantId: string): string {
   if (!tenantId.startsWith("USR-")) {
-    throw new Error("Invalid tenantId format");
+    throw new Error(MESSAGES.ADMIN.INVALID_TENANT_ID_FORMAT);
   }
   return tenantId.slice(4);
 }
@@ -45,45 +45,27 @@ export default class AdminLandlordService implements IAdminLandlordService {
       page: dto.page ?? 1,
     });
 
-    const query: FilterQuery<ILandlord> = { role: "LANDLORD" };
-    if (dto.search) {
-      query.$or = [
-        { firstName: { $regex: dto.search, $options: "i" } },
-        { lastName: { $regex: dto.search, $options: "i" } },
-        { email: { $regex: dto.search, $options: "i" } },
-      ];
-    }
-
     const page = dto.page ?? 1;
     const limit = dto.limit ?? 10;
     const skip = (page - 1) * limit;
 
     const [landlords, total] = await Promise.all([
-      this.landlordRepo
-        .findMany(query)
-        .select("-passwordHash")
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit),
-      this.landlordRepo.count(query),
+      this.landlordRepo.findPaginated(
+        skip,
+        limit,
+        dto.search,
+        dto.from,
+        dto.to,
+      ),
+      this.landlordRepo.countByFilter(dto.search, dto.from, dto.to),
     ]);
-
-    // const formattedLandlords = landlords.map((landlord) => ({
-    //   id: landlord._id.toString(),
-    //   tenantId: generateUserId(landlord._id.toString()),
-    //   fullName: `${landlord.firstName} ${landlord.lastName}`,
-    //   email: landlord.email,
-    //   phone: landlord.phone ?? "",
-    //   avatar: landlord.avatar,
-    //   status: landlord.isActive ? "active" : "blocked",
-    //   kycStatus: landlord.kycStatus ?? "NOT_SUBMITTED",
-    // }));
 
     const mappedLandlords = landlords.map((l) =>
       AdminMapper.toLandlordListItem(l),
     );
 
     logger.info(`Fetched ${landlords.length} landlords`, { total, page });
+
     return {
       users: mappedLandlords,
       total,
@@ -92,36 +74,21 @@ export default class AdminLandlordService implements IAdminLandlordService {
     };
   }
 
-  async getLandlordDetails(id: string): Promise<LandlordDetailsDto> {
-    logger.info("Fetching single landlord by ID", { id });
+  async getLandlordDetails(landlordId: string): Promise<LandlordDetailsDto> {
+    logger.info("Fetching single landlord by ID", { landlordId });
 
-    const landlord = await this.landlordRepo.findById(id);
+    const landlord = await this.landlordRepo.findById(landlordId);
 
     if (!landlord) {
-      throw new AppError("Landlord not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.ADMIN.LANDLORD_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
-    // const landlordDetails: LandlordDetailsDto = {
-    //   id: landlord._id.toString(),
-    //   landlordId: generateUserId(landlord._id.toString()),
-    //   fullName: `${landlord.firstName} ${landlord.lastName}`,
-    //   email: landlord.email,
-    //   phone: landlord.phone ?? "",
-    //   avatar: landlord.avatar ?? "",
-    //   status: landlord.isActive ? "active" : "blocked",
-    //   kycStatus: landlord.kycStatus ?? "NOT_SUBMITTED",
-
-    //   aadharNumber: landlord.kycDetails?.aadhaarNumber || "",
-    //   panNumber: landlord.kycDetails?.panNumber || "",
-    //   aadharFrontUrl: landlord.kycDocuments?.aadhaarFront || "",
-    //   aadharBackUrl: landlord.kycDocuments?.aadhaarBack || "",
-    //   panFrontUrl: landlord.kycDocuments?.panCard || "",
-    //   liveSelfie: landlord.kycDocuments?.liveSelfie || "",
-    //   kycRejectedReason: landlord.kycRejectedReason || "",
-    // };
     const landlordDetails = AdminMapper.toLandlordDetail(landlord);
     logger.info("Single landlord fetched successfully", {
-      id,
+      landlordId,
       fullName: landlordDetails.fullName,
     });
     return landlordDetails;
@@ -135,7 +102,10 @@ export default class AdminLandlordService implements IAdminLandlordService {
     });
 
     if (!landlord) {
-      throw new AppError("Landlord not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.ADMIN.LANDLORD_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     logger.info("KYC approved and landlord activated", { landlordId });
@@ -153,7 +123,10 @@ export default class AdminLandlordService implements IAdminLandlordService {
     });
 
     if (!landlord) {
-      throw new AppError("Landlord not found", HttpStatus.NOT_FOUND);
+      throw new AppError(
+        MESSAGES.ADMIN.LANDLORD_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     logger.info("KYC rejected", { landlordId });
@@ -161,30 +134,33 @@ export default class AdminLandlordService implements IAdminLandlordService {
   }
 
   async toggleLandlordStatus(
-    id: string,
+    landlordId: string,
     dto: ToggleUserStatusDto,
   ): Promise<LandlordStatusResult> {
     logger.info("Admin toggling user status", {
-      userId: id,
+      userId: landlordId,
       status: dto.status,
     });
 
-    if (!Types.ObjectId.isValid(id)) {
-      throw new AppError("Invalid user ID", HttpStatus.BAD_REQUEST);
+    if (!Types.ObjectId.isValid(landlordId)) {
+      throw new AppError(
+        MESSAGES.ADMIN.INVALID_USER_ID,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
-    const updatedUser = await this.landlordRepo.updateLandlordById(id, {
+    const updatedUser = await this.landlordRepo.updateLandlordById(landlordId, {
       isActive: dto.status === "active",
     });
 
     if (!updatedUser) {
       throw new AppError(
-        "Failed to update landlord",
+        MESSAGES.ADMIN.UPDATE_FAILED,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 
-    logger.info("Landlord status toggled", { id, status: dto.status });
+    logger.info("Landlord status toggled", { landlordId, status: dto.status });
     return {
       id: String(updatedUser._id),
       userId: generateUserId(String(updatedUser._id)),

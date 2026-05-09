@@ -19,6 +19,28 @@ export const uploadImage = multer({
   },
 });
 
+export const uploadAttachment = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Images, PDF, and Word documents only"));
+    }
+  },
+});
+
 export const uploadKycImages = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
@@ -34,7 +56,6 @@ export const uploadKycImages = multer({
   { name: "aadhaarFront", maxCount: 1 },
   { name: "aadhaarBack", maxCount: 1 },
   { name: "panCard", maxCount: 1 },
-  // { name: "selfie", maxCount: 1 },
 ]);
 
 export const uploadMultipleImages = multer({

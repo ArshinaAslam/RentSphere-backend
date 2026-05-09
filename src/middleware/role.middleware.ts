@@ -26,7 +26,6 @@ export const authorizeRole = (...roles: UserRole[]) => {
     }
 
     const userRole = req.user.role as UserRole;
-    console.log("role", userRole);
 
     if (!roles.includes(userRole)) {
       logger.warn("Access denied - Insufficient role", {
@@ -43,8 +42,6 @@ export const authorizeRole = (...roles: UserRole[]) => {
       userId: req.user.userId,
       role: userRole,
     });
-
-    console.log("reached rome middleware for approvekyc");
     next();
   };
 };

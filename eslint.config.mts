@@ -7,16 +7,16 @@ import prettier from 'eslint-plugin-prettier';
 import prettierConfig from 'eslint-config-prettier';
 
 export default tseslint.config(
-  // ── Ignore ─────────────────────────────────────────────────────────────────
+ 
   {
     ignores: ['dist/**', 'node_modules/**', 'logs/**', 'build/**'],
   },
 
-  // ── Base JS + TypeScript ────────────────────────────────────────────────────
+  
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
 
-  // ── Main config ─────────────────────────────────────────────────────────────
+  
   {
     files: ['src/**/*.ts'],
 
@@ -43,11 +43,11 @@ export default tseslint.config(
     },
 
     rules: {
-      // ── Prettier ───────────────────────────────────────────────────────────
+      
       ...prettierConfig.rules,
       'prettier/prettier': 'error',
 
-      // ── TypeScript strict ──────────────────────────────────────────────────
+      
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
@@ -61,7 +61,7 @@ export default tseslint.config(
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/await-thenable': 'error',
 
-      // ── Import order ───────────────────────────────────────────────────────
+      
       'import/order': [
         'error',
         {
@@ -85,7 +85,7 @@ export default tseslint.config(
       ],
       'import/no-duplicates': 'error',
 
-      // ── General ────────────────────────────────────────────────────────────
+    
       'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
       'prefer-const': 'error',
       'no-var': 'error',

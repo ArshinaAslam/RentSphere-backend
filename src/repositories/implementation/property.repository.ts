@@ -57,19 +57,19 @@ export class PropertyRepository
     return this.count(filter);
   }
 
-  async findPropertyById(id: string): Promise<IProperty | null> {
-    return this.findById(id);
+  async findPropertyById(propertyId: string): Promise<IProperty | null> {
+    return this.findById(propertyId);
   }
 
-  async deletePropertyById(id: string): Promise<void> {
-    await this.delete(id);
+  async deletePropertyById(propertyId: string): Promise<void> {
+    await this.delete(propertyId);
   }
 
   async updateProperty(
-    id: string,
+    propertyId: string,
     updateData: Partial<IProperty>,
   ): Promise<IProperty | null> {
-    return this.update(id, updateData);
+    return this.update(propertyId, updateData);
   }
 
   async findAllAvailable(params: {
@@ -138,9 +138,9 @@ export class PropertyRepository
     return this.count(filter);
   }
 
-  async findTenantPropertyById(id: string): Promise<IProperty | null> {
+  async findTenantPropertyById(propertyId: string): Promise<IProperty | null> {
     return this.model
-      .findById(id)
+      .findById(propertyId)
       .populate({
         path: "landlordId",
         select:
@@ -154,5 +154,45 @@ export class PropertyRepository
       .find({ landlordId } as FilterQuery<IProperty>)
       .sort({ createdAt: -1 })
       .exec();
+  }
+
+  async findAllForAdmin(params: {
+    skip: number;
+    limit: number;
+    from?: string;
+    to?: string;
+  }): Promise<IProperty[]> {
+    const filter: FilterQuery<IProperty> = {};
+
+    if (params.from && params.to) {
+      filter.createdAt = {
+        $gte: new Date(params.from),
+        $lte: new Date(params.to),
+      };
+    }
+
+    return this.model
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .skip(params.skip)
+      .limit(params.limit)
+      .lean()
+      .exec();
+  }
+
+  async countAllForAdmin(params: {
+    from?: string;
+    to?: string;
+  }): Promise<number> {
+    const filter: FilterQuery<IProperty> = {};
+
+    if (params.from && params.to) {
+      filter.createdAt = {
+        $gte: new Date(params.from),
+        $lte: new Date(params.to),
+      };
+    }
+
+    return this.count(filter);
   }
 }

@@ -1,3 +1,8 @@
+import type {
+  PropertySummary,
+  TenantSummary,
+} from "../../mappers/visitBooking.mapper";
+
 export interface VisitBookingResponseDto {
   _id: string;
   propertyId: string | PropertySummary;

@@ -7,22 +7,6 @@ import type {
   ToggleUserStatusDto,
 } from "../../../dto/admin/admin.user.dto";
 
-// export interface LandlordListResult {
-//   users: Array<{
-//     id: string;
-//     tenantId: string;
-//     fullName: string;
-//     email: string;
-//     phone: string;
-//     status: "active" | "blocked";
-//     kycStatus: string;
-//     // joinedAt: string;
-//   }>;
-//   total: number;
-//   page: number;
-//   totalPages: number;
-// }
-
 export interface LandlordStatusResult {
   id: string;
   userId: string;

@@ -33,4 +33,8 @@ export interface IChatService {
   ): Promise<VoiceMessageDto>;
 
   getCallHistory(userId: string): Promise<MessageResponseDto[]>;
+  uploadAttachment(
+    file: Express.Multer.File,
+    userId: string,
+  ): Promise<{ url: string; originalName: string }>;
 }

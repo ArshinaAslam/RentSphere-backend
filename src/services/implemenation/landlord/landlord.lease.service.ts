@@ -1,17 +1,21 @@
 import { injectable, inject } from "tsyringe";
 
+import { MESSAGES } from "../../../common/constants/statusMessages";
 import { DI_TYPES } from "../../../common/di/types";
 import { HttpStatus } from "../../../common/enums/httpStatus.enum";
 import { AppError } from "../../../common/errors/appError";
+import { PLATFORM_FEE_PERCENT } from "../../../config/razorPay";
 import {
   LandlordPropertyMapper,
   LeaseMapper,
   TenantSearchMapper,
 } from "../../../mappers/lease.mapper";
 import { IConversationRepository } from "../../../repositories/interface/IConversationRepository";
+import { IPaymentRepository } from "../../../repositories/interface/IPaymentRepository";
 import { IPropertyRepository } from "../../../repositories/interface/IPropertyRepository";
 import { ITenantRepository } from "../../../repositories/interface/ITenantRepository";
 import logger from "../../../utils/logger";
+import { createAndEmitNotification } from "../../../utils/notificationEmitter";
 
 import type {
   CreateLeaseDto,
@@ -36,6 +40,8 @@ export class LandlordLeaseService implements ILandlordLeaseService {
     private _convRepo: IConversationRepository,
     @inject(DI_TYPES.PropertyRepository)
     private _propertyRepo: IPropertyRepository,
+    @inject(DI_TYPES.PaymentRepository)
+    private _paymentRepo: IPaymentRepository,
   ) {}
 
   async createLease(
@@ -74,7 +80,8 @@ export class LandlordLeaseService implements ILandlordLeaseService {
     landlordId: string,
   ): Promise<LeaseResponseDto> {
     const lease = await this._leaseRepo.findById(leaseId);
-    if (!lease) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!lease)
+      throw new AppError(MESSAGES.LEASE.NOT_FOUND, HttpStatus.NOT_FOUND);
     const leaseLandlordId =
       typeof lease.landlordId === "object" &&
       lease.landlordId !== null &&
@@ -82,10 +89,10 @@ export class LandlordLeaseService implements ILandlordLeaseService {
         ? String((lease.landlordId as { _id: string })._id)
         : String(lease.landlordId);
     if (leaseLandlordId !== landlordId)
-      throw new AppError("Unauthorized", HttpStatus.FORBIDDEN);
+      throw new AppError(MESSAGES.LEASE.UNAUTHORIZED, HttpStatus.FORBIDDEN);
     if (lease.status !== "draft")
       throw new AppError(
-        "Only draft leases can be edited",
+        MESSAGES.LEASE.ONLY_DRAFT_EDIT,
         HttpStatus.BAD_REQUEST,
       );
 
@@ -117,7 +124,8 @@ export class LandlordLeaseService implements ILandlordLeaseService {
       }),
     });
 
-    if (!updated) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!updated)
+      throw new AppError(MESSAGES.LEASE.NOT_FOUND, HttpStatus.NOT_FOUND);
     return LeaseMapper.toDto(updated);
   }
 
@@ -126,7 +134,8 @@ export class LandlordLeaseService implements ILandlordLeaseService {
     landlordId: string,
   ): Promise<LeaseResponseDto> {
     const lease = await this._leaseRepo.findById(leaseId);
-    if (!lease) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!lease)
+      throw new AppError(MESSAGES.LEASE.NOT_FOUND, HttpStatus.NOT_FOUND);
     const leaseLandlordId =
       typeof lease.landlordId === "object" &&
       lease.landlordId !== null &&
@@ -134,10 +143,10 @@ export class LandlordLeaseService implements ILandlordLeaseService {
         ? String((lease.landlordId as { _id: string })._id)
         : String(lease.landlordId);
     if (leaseLandlordId !== landlordId)
-      throw new AppError("Unauthorized", HttpStatus.FORBIDDEN);
+      throw new AppError(MESSAGES.LEASE.UNAUTHORIZED, HttpStatus.FORBIDDEN);
     if (lease.status !== "draft")
       throw new AppError(
-        "Only draft leases can be sent",
+        MESSAGES.LEASE.ONLY_DRAFT_SEND,
         HttpStatus.BAD_REQUEST,
       );
 
@@ -145,10 +154,25 @@ export class LandlordLeaseService implements ILandlordLeaseService {
       sentAt: new Date(),
     });
 
-    if (!updated) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!updated)
+      throw new AppError(MESSAGES.LEASE.NOT_FOUND, HttpStatus.NOT_FOUND);
     logger.info("Lease sent to tenant", {
       leaseId,
       tenantId: String(lease.tenantId),
+    });
+    const tenantId =
+      typeof lease.tenantId === "object" && lease.tenantId !== null
+        ? String((lease.tenantId as { _id: string })._id)
+        : String(lease.tenantId);
+
+    await createAndEmitNotification({
+      recipientId: tenantId,
+      recipientRole: "tenant",
+      type: "lease_sent",
+      title: "New Lease to Review",
+      message:
+        "Your landlord has sent you a lease agreement to review and sign.",
+      link: "/tenant/my-lease",
     });
     return LeaseMapper.toDto(updated);
   }
@@ -186,7 +210,8 @@ export class LandlordLeaseService implements ILandlordLeaseService {
     landlordId: string,
   ): Promise<LeaseResponseDto> {
     const lease = await this._leaseRepo.findById(leaseId);
-    if (!lease) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!lease)
+      throw new AppError(MESSAGES.LEASE.NOT_FOUND, HttpStatus.NOT_FOUND);
     const leaseLandlordId =
       typeof lease.landlordId === "object" &&
       lease.landlordId !== null &&
@@ -195,7 +220,7 @@ export class LandlordLeaseService implements ILandlordLeaseService {
         : String(lease.landlordId);
 
     if (leaseLandlordId !== landlordId)
-      throw new AppError("Unauthorized", HttpStatus.FORBIDDEN);
+      throw new AppError(MESSAGES.LEASE.UNAUTHORIZED, HttpStatus.FORBIDDEN);
     return LeaseMapper.toDto(lease);
   }
 
@@ -204,7 +229,8 @@ export class LandlordLeaseService implements ILandlordLeaseService {
     landlordId: string,
   ): Promise<LeaseResponseDto> {
     const lease = await this._leaseRepo.findById(leaseId);
-    if (!lease) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!lease)
+      throw new AppError(MESSAGES.LEASE.NOT_FOUND, HttpStatus.NOT_FOUND);
 
     const leaseLandlordId =
       typeof lease.landlordId === "object" &&
@@ -214,22 +240,24 @@ export class LandlordLeaseService implements ILandlordLeaseService {
         : String(lease.landlordId);
 
     if (leaseLandlordId !== landlordId)
-      throw new AppError("Unauthorized", HttpStatus.FORBIDDEN);
+      throw new AppError(MESSAGES.LEASE.UNAUTHORIZED, HttpStatus.FORBIDDEN);
     if (!["signed", "active"].includes(lease.status))
       throw new AppError(
-        "Only signed or active leases can be terminated",
+        MESSAGES.LEASE.TERMINATE_INVALID,
         HttpStatus.BAD_REQUEST,
       );
 
     const updated = await this._leaseRepo.updateStatus(leaseId, "terminated");
-    if (!updated) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!updated)
+      throw new AppError(MESSAGES.LEASE.NOT_FOUND, HttpStatus.NOT_FOUND);
     logger.info("Lease terminated", { leaseId });
     return LeaseMapper.toDto(updated);
   }
 
   async deleteLease(leaseId: string, landlordId: string): Promise<void> {
     const lease = await this._leaseRepo.findById(leaseId);
-    if (!lease) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!lease)
+      throw new AppError(MESSAGES.LEASE.NOT_FOUND, HttpStatus.NOT_FOUND);
     const leaseLandlordId =
       typeof lease.landlordId === "object" &&
       lease.landlordId !== null &&
@@ -237,7 +265,7 @@ export class LandlordLeaseService implements ILandlordLeaseService {
         ? String((lease.landlordId as { _id: string })._id)
         : String(lease.landlordId);
     if (leaseLandlordId !== landlordId)
-      throw new AppError("Unauthorized", HttpStatus.FORBIDDEN);
+      throw new AppError(MESSAGES.LEASE.UNAUTHORIZED, HttpStatus.UNAUTHORIZED);
     if (lease.status !== "draft")
       throw new AppError(
         "Only draft leases can be deleted",
@@ -254,7 +282,8 @@ export class LandlordLeaseService implements ILandlordLeaseService {
     dto: signLandlordLeaseDto,
   ): Promise<LeaseResponseDto> {
     const lease = await this._leaseRepo.findById(leaseId);
-    if (!lease) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!lease)
+      throw new AppError(MESSAGES.LEASE.NOT_FOUND, HttpStatus.NOT_FOUND);
 
     const leaseLandlordId =
       typeof lease.landlordId === "object" &&
@@ -264,11 +293,11 @@ export class LandlordLeaseService implements ILandlordLeaseService {
         : String(lease.landlordId);
 
     if (leaseLandlordId !== landlordId)
-      throw new AppError("Unauthorized", HttpStatus.FORBIDDEN);
+      throw new AppError(MESSAGES.LEASE.UNAUTHORIZED, HttpStatus.FORBIDDEN);
 
     if (lease.status !== "signed")
       throw new AppError(
-        "Landlord can only sign after tenant has signed",
+        MESSAGES.LEASE.LANDLORD_SIGN_INVALID,
         HttpStatus.BAD_REQUEST,
       );
 
@@ -279,8 +308,30 @@ export class LandlordLeaseService implements ILandlordLeaseService {
       },
     });
 
-    if (!updated) throw new AppError("Lease not found", HttpStatus.NOT_FOUND);
+    if (!updated)
+      throw new AppError(MESSAGES.LEASE.NOT_FOUND, HttpStatus.NOT_FOUND);
     logger.info("Lease signed by landlord — now active", { leaseId });
+    const tenantId =
+      typeof lease.tenantId === "object" && lease.tenantId !== null
+        ? String((lease.tenantId as { _id: string })._id)
+        : String(lease.tenantId);
+    await createAndEmitNotification({
+      recipientId: tenantId,
+      recipientRole: "tenant",
+      type: "lease_active",
+      title: "Your Lease is Now Active",
+      message: "Both parties have signed. Your lease is now active.",
+      link: "/tenant/my-lease",
+    });
+    await this.generateFirstRentIfActive(leaseId);
+    await createAndEmitNotification({
+      recipientId: tenantId,
+      recipientRole: "tenant",
+      type: "lease_active",
+      title: "Lease Active — First Rent Due",
+      message: `Your lease is now active. Your first rent payment of ₹${lease.rentAmount.toLocaleString("en-IN")} is ready to pay.`,
+      link: "/tenant/payments",
+    });
     return LeaseMapper.toDto(updated);
   }
 
@@ -311,6 +362,74 @@ export class LandlordLeaseService implements ILandlordLeaseService {
   ): Promise<LandlordPropertyDto[]> {
     const properties =
       await this._propertyRepo.findAllPropertyByLandlordId(landlordId);
+
     return LandlordPropertyMapper.toDtoList(properties);
+  }
+
+  private async generateFirstRentIfActive(leaseId: string): Promise<void> {
+    const lease = await this._leaseRepo.findById(leaseId);
+    if (!lease || lease.status !== "active") return;
+
+    const payments = await this._paymentRepo.findByLeaseId(leaseId);
+    const depositPaid = payments.some(
+      (p) => p.type === "deposit" && p.status === "completed",
+    );
+    if (!depositPaid) {
+      logger.info(
+        "Lease activated but deposit not paid yet — skipping rent generation",
+        { leaseId },
+      );
+      return;
+    }
+
+    const today = new Date();
+    const thisMonth = today.getMonth() + 1;
+    const thisYear = today.getFullYear();
+
+    const rentExists = payments.some(
+      (p) => p.type === "rent" && p.month === thisMonth && p.year === thisYear,
+    );
+    if (rentExists) return;
+
+    const amount = lease.rentAmount;
+    const platformFee = Math.round(amount * (PLATFORM_FEE_PERCENT / 100));
+    const landlordAmount = amount - platformFee;
+    const dueDate = new Date(thisYear, thisMonth - 1, lease.paymentDueDay);
+
+    const tenantId =
+      typeof lease.tenantId === "object" && lease.tenantId !== null
+        ? String((lease.tenantId as { _id: string })._id)
+        : String(lease.tenantId);
+
+    const landlordId =
+      typeof lease.landlordId === "object" && lease.landlordId !== null
+        ? String((lease.landlordId as { _id: string })._id)
+        : String(lease.landlordId);
+
+    const propertyId =
+      typeof lease.propertyId === "object" && lease.propertyId !== null
+        ? String((lease.propertyId as { _id: string })._id)
+        : String(lease.propertyId);
+
+    await this._paymentRepo.createPayment({
+      leaseId,
+      tenantId,
+      landlordId,
+      propertyId,
+      type: "rent",
+      amount,
+      platformFee,
+      landlordAmount,
+      status: "pending",
+      dueDate,
+      month: thisMonth,
+      year: thisYear,
+    });
+
+    logger.info("First rent generated after landlord signed", {
+      leaseId,
+      thisMonth,
+      thisYear,
+    });
   }
 }
