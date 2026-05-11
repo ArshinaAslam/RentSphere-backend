@@ -1,5 +1,3 @@
-// controllers/admin/adminAmenityTypeController.ts
-
 import { Request, Response } from "express";
 import { injectable, inject } from "tsyringe";
 
