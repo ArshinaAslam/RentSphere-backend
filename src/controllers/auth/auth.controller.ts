@@ -48,14 +48,14 @@ export class AuthController {
     res.cookie("accessToken", result.tokens.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: ENV.ACCESS_TOKEN_MAX_AGE,
     });
 
     res.cookie("refreshToken", result.tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: ENV.REFRESH_TOKEN_MAX_AGE,
     });
 
@@ -105,14 +105,14 @@ export class AuthController {
     res.cookie("accessToken", result.tokens.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: ENV.ACCESS_TOKEN_MAX_AGE,
     });
 
     res.cookie("refreshToken", result.tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: ENV.REFRESH_TOKEN_MAX_AGE,
     });
 
@@ -172,7 +172,7 @@ export class AuthController {
     res.cookie("accessToken", result.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: ENV.ACCESS_TOKEN_MAX_AGE,
     });
 
@@ -186,7 +186,7 @@ export class AuthController {
     res.clearCookie("accessToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "none",
       path: "/",
       maxAge: 0,
     });
@@ -194,7 +194,7 @@ export class AuthController {
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "none",
       path: "/",
       maxAge: 0,
     });
