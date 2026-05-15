@@ -30,23 +30,17 @@ export class AdminAuthController {
 
     res.cookie("accessToken", result.tokens.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: true,
+      sameSite: "none",
       maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refreshToken", result.tokens.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: true,
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-
-    // return res.status(HttpStatus.OK).json({
-    //   success: true,
-    //   user: result.user,
-    //   redirectTo: "/admin/dashboard",
-    // });
 
     return res.status(HttpStatus.OK).json(
       ApiResponses.success(
