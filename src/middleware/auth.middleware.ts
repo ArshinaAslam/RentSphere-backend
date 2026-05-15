@@ -25,7 +25,16 @@ export const authenticateToken = (
   res: Response,
   next: NextFunction,
 ): void => {
-  const { accessToken } = req.cookies as { accessToken: string | undefined };
+  const authHeader = req.headers.authorization;
+  const headerToken = authHeader?.startsWith("Bearer ")
+    ? authHeader.split(" ")[1]
+    : null;
+
+  const { accessToken: cookieToken } = req.cookies as {
+    accessToken: string | undefined;
+  };
+
+  const accessToken = headerToken ?? cookieToken;
 
   if (!accessToken) {
     throw new AppError(
