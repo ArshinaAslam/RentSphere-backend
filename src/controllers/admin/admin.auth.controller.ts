@@ -47,6 +47,7 @@ export class AdminAuthController {
         {
           user: result.user,
           redirectTo: "/admin/dashboard",
+          tokens: result.tokens,
         },
         "Admin login successful",
       ),
