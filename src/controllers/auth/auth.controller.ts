@@ -63,6 +63,7 @@ export class AuthController {
       ApiResponses.success(
         {
           user: result.user,
+          tokens: result.tokens,
           redirectTo:
             role === "TENANT" ? "/tenant/dashboard" : "/landlord/kyc-details",
         },
